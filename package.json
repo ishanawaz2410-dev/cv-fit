@@ -1,0 +1,7 @@
+{
+  "name": "cv-fit",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Match a CV against a job posting: skills you have, gaps, and tailored bullet rewrites."
+}
