@@ -67,12 +67,35 @@ ${jd.slice(0, 12000)}
 ${cv.slice(0, 12000)}`;
 }
 
+function tryParse(t) {
+  try { return JSON.parse(t); } catch {}
+  // common slips: curly quotes, trailing commas
+  const fixed = t.replace(/[\u201C\u201D]/g, '"').replace(/,\s*([}\]])/g, "$1");
+  try { return JSON.parse(fixed); } catch {}
+  return null;
+}
+
 function parseJson(text) {
-  try { return JSON.parse(text); } catch {}
-  const fence = text.match(/```(?:json)?\s*([\s\S]*?)```/);
-  if (fence) { try { return JSON.parse(fence[1]); } catch {} }
-  const a = text.indexOf("{"), b = text.lastIndexOf("}");
-  if (a !== -1 && b > a) { try { return JSON.parse(text.slice(a, b + 1)); } catch {} }
+  const t = String(text || "").trim();
+  let v = tryParse(t);
+  if (v == null) {
+    const fence = t.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fence) v = tryParse(fence[1].trim());
+  }
+  if (v == null) {
+    const a = t.indexOf("{"), b = t.lastIndexOf("}");
+    if (a !== -1 && b > a) v = tryParse(t.slice(a, b + 1));
+  }
+  return v;
+}
+
+// If the model wrapped the answer, e.g. {"analysis": {...}}, unwrap it.
+function unwrap(v, mustHave) {
+  if (!v || typeof v !== "object") return null;
+  if (Array.isArray(v[mustHave])) return v;
+  for (const inner of Object.values(v)) {
+    if (inner && typeof inner === "object" && Array.isArray(inner[mustHave])) return inner;
+  }
   return null;
 }
 
@@ -122,7 +145,7 @@ export default async function handler(req, res) {
       },
       body: JSON.stringify({
         model: process.env.ANTHROPIC_MODEL || "claude-sonnet-5-5",
-        max_tokens: kind === "cv" ? 4500 : 3000,
+        max_tokens: kind === "cv" ? 10000 : 8000,
         messages: [{ role: "user", content: kind === "cv" ? cvPrompt(cv, jd, title) : buildPrompt(cv, jd, title) }],
       }),
     });
@@ -131,18 +154,24 @@ export default async function handler(req, res) {
       const limited = r.status === 429;
       res.status(limited ? 429 : 502).json({
         code: limited ? "rate_limited" : "upstream_error",
-        error: data?.error?.message,
+        detail: data?.error?.message || `Anthropic API returned ${r.status}`,
       });
       return;
     }
     const text = (data.content || []).filter((b) => b.type === "text").map((b) => b.text).join("");
-    const result = parseJson(text);
+    const result = unwrap(parseJson(text), kind === "cv" ? "experience" : "requirements");
     if (!result) {
-      res.status(502).json({ code: "invalid_json" });
+      const cutOff = data.stop_reason === "max_tokens";
+      // Shows up in Vercel → your project → Logs
+      console.error("CV Fit: unreadable reply", { kind, stop_reason: data.stop_reason, start: text.slice(0, 300) });
+      res.status(502).json({
+        code: cutOff ? "cut_off" : "invalid_json",
+        detail: `stop_reason=${data.stop_reason || "?"}; reply began: ${text.slice(0, 160)}`,
+      });
       return;
     }
     res.status(200).json({ result });
   } catch (e) {
-    res.status(502).json({ code: "upstream_error", error: String(e?.message || e) });
+    res.status(502).json({ code: "upstream_error", detail: String(e?.message || e) });
   }
 }
