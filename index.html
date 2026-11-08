@@ -6,267 +6,345 @@
 <meta name="description" content="Match a CV against a job posting: skills you have, gaps, and a tailored CV to download for Word.">
 <title>CV Fit</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Schibsted+Grotesk:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
 <style>
-body{margin:0}[hidden]{display:none!important}img{max-width:100%}
-/* Layout: a working desk. Inputs on top, then a score strip, then the posting "marked up" with a highlighter beside the skills, then rewrites. */
+/* Layout: a recruiter's review desk. A navy masthead carries the three real steps (paste, check, tailor);
+   the work sits on white sheets below, with a yellow highlighter marking what already matches. */
 :root{
-  --bg:#f4f6f8; --paper:#ffffff; --ink:#15212b; --muted:#5b6a76; --line:#dbe1e7;
-  --accent:#1d5f74; --accent-ink:#ffffff; --accent-soft:#e2eef2;
-  --hl:#fbe96a; --hl-ink:#3a3300; --good:#1f7a4d; --good-soft:#dcf1e5;
-  --warn:#9a6a00; --warn-soft:#fbf0d4; --bad:#b4412f; --bad-soft:#fbe3de;
-  --display:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif;
-  --body:"Schibsted Grotesk",ui-sans-serif,system-ui,sans-serif;
-  --mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  --ground:#eef1f6; --sheet:#ffffff; --ink:#18203a; --muted:#5d6680; --line:#dde2ec; --line-strong:#c6cddc;
+  --mast:#18203a; --mast-ink:#f4f6fb; --mast-muted:#a9b2cc;
+  --accent:#e4573d; --accent-hover:#cf4630; --accent-ink:#ffffff; --accent-soft:#fdebe6;
+  --navy-soft:#e7ebf6;
+  --hl:#ffd84d; --hl-ink:#2b2200;
+  --good:#16804f; --good-soft:#dff3e8; --mid:#a66a00; --mid-soft:#fcf0d2; --bad:#c2402b; --bad-soft:#fbe4df;
+  --paper:#ffffff; --paper-ink:#1b1f2a; --paper-muted:#5f6675; --paper-accent:#1d3f8f;
+  --shadow:0 1px 2px rgba(24,32,58,.06),0 6px 20px -10px rgba(24,32,58,.18);
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:14px;
 }
 @media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
-  --bg:#0f161c; --paper:#16212a; --ink:#e4ebf0; --muted:#93a4b1; --line:#2a3945;
-  --accent:#5fb3cc; --accent-ink:#0b1a20; --accent-soft:#1a3440;
-  --hl:#c9b52a; --hl-ink:#1a1600; --good:#5fcf93; --good-soft:#163527;
-  --warn:#e5b54a; --warn-soft:#3a2e12; --bad:#f08a76; --bad-soft:#3d1f1a; color-scheme:dark}}
+  --ground:#0e1322; --sheet:#161d31; --ink:#e8ecf6; --muted:#9aa4be; --line:#273150; --line-strong:#36426a;
+  --mast:#0a0f1c; --mast-ink:#f4f6fb; --mast-muted:#8d97b4;
+  --accent:#f06a4f; --accent-hover:#ff7f66; --accent-ink:#1a0a05; --accent-soft:#3a1d18;
+  --navy-soft:#1f2842;
+  --hl:#e9c437; --hl-ink:#1d1700;
+  --good:#5ad397; --good-soft:#123326; --mid:#f0bd52; --mid-soft:#3a2d10; --bad:#ff8d78; --bad-soft:#3d1c17;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); color-scheme:dark}}
 :root[data-theme="dark"]{
-  --bg:#0f161c; --paper:#16212a; --ink:#e4ebf0; --muted:#93a4b1; --line:#2a3945;
-  --accent:#5fb3cc; --accent-ink:#0b1a20; --accent-soft:#1a3440;
-  --hl:#c9b52a; --hl-ink:#1a1600; --good:#5fcf93; --good-soft:#163527;
-  --warn:#e5b54a; --warn-soft:#3a2e12; --bad:#f08a76; --bad-soft:#3d1f1a; color-scheme:dark}
+  --ground:#0e1322; --sheet:#161d31; --ink:#e8ecf6; --muted:#9aa4be; --line:#273150; --line-strong:#36426a;
+  --mast:#0a0f1c; --mast-ink:#f4f6fb; --mast-muted:#8d97b4;
+  --accent:#f06a4f; --accent-hover:#ff7f66; --accent-ink:#1a0a05; --accent-soft:#3a1d18;
+  --navy-soft:#1f2842;
+  --hl:#e9c437; --hl-ink:#1d1700;
+  --good:#5ad397; --good-soft:#123326; --mid:#f0bd52; --mid-soft:#3a2d10; --bad:#ff8d78; --bad-soft:#3d1c17;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); color-scheme:dark}
 
 *{box-sizing:border-box}
-body{background:var(--bg);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
-.wrap{max-width:1180px;margin:0 auto;padding-block:28px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:flex;flex-direction:column;gap:28px}
-header{display:flex;flex-wrap:wrap;align-items:end;justify-content:space-between;gap:12px}
-h1{font-family:var(--display);font-weight:800;font-size:2rem;letter-spacing:-.02em;margin:0;line-height:1.1}
-h1 mark{background:linear-gradient(transparent 55%,var(--hl) 55%,var(--hl) 92%,transparent 92%);color:inherit;padding:0 .1em}
-.sub{color:var(--muted);margin:4px 0 0;max-width:60ch}
-h2{font-family:var(--display);font-size:1.15rem;font-weight:700;margin:0;text-wrap:balance}
-.label{font-size:.72rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);font-weight:600}
-.panel{background:var(--paper);border:1px solid var(--line);border-radius:10px;padding:18px;display:flex;flex-direction:column;gap:12px;min-width:0}
-.grid2{display:grid;grid-template-columns:1.25fr 1fr;gap:16px}
-@media (max-width:820px){.grid2{grid-template-columns:1fr}}
-input[type=text],textarea{width:100%;font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:8px;padding:10px 12px}
-textarea{resize:vertical;min-height:220px;font-size:13.5px;line-height:1.5}
-input:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+[hidden]{display:none!important}
+.gutter{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.inner{max-width:1180px;margin:0 auto}
+
+/* masthead */
+.mast{background:var(--mast);color:var(--mast-ink);padding-block:34px 92px;position:relative;overflow:hidden}
+.mast::after{content:"";position:absolute;right:-120px;top:-140px;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(228,87,61,.28),transparent 65%);pointer-events:none}
+.mast .inner{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:space-between;position:relative;z-index:1}
+.brand{display:flex;flex-direction:column;gap:10px;min-width:0}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mast-muted)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,5vw,3.6rem);line-height:.95;letter-spacing:-.03em;margin:0}
+h1 .swash{position:relative;white-space:nowrap;isolation:isolate;padding:0 .04em}
+h1 .swash::before{content:"";position:absolute;left:-.06em;right:-.08em;top:.1em;bottom:-.02em;background:var(--hl);opacity:.9;border-radius:3px;transform:skewX(-8deg);z-index:-1}
+h1 .swash span{position:relative;color:var(--mast)}
+.tag{color:var(--mast-muted);max-width:48ch;margin:0;font-size:1rem}
+.steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.steps li{display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:6px 14px 6px 6px;font-size:.86rem;color:var(--mast-ink)}
+.steps b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.1);font-family:var(--mono);font-size:.72rem}
+.steps li:first-child b{background:var(--accent);color:var(--accent-ink)}
+.who{font-size:.8rem;color:var(--mast-muted)}
+.who strong{color:var(--mast-ink);font-weight:600}
+
+/* page */
+.page{margin-top:-64px;padding-block:0 72px;position:relative;z-index:2}
+.page .inner{display:flex;flex-direction:column;gap:22px}
+.section-head{display:flex;align-items:baseline;gap:12px;margin:26px 2px 0}
+.section-head .n{font-family:var(--mono);font-size:.78rem;color:var(--accent);font-weight:500}
+.section-head h2{font-family:var(--display);font-weight:800;font-size:1.45rem;letter-spacing:-.015em;margin:0}
+.section-head p{margin:0;color:var(--muted);font-size:.92rem}
+h3{font-family:var(--display);font-weight:600;font-size:1.08rem;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.hint{font-size:.86rem;color:var(--muted)}
+
+.panel{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0;box-shadow:var(--shadow)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
 .row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
-button{font:inherit;font-weight:600;border-radius:8px;border:1px solid var(--line);background:var(--paper);color:var(--ink);padding:9px 14px;cursor:pointer}
-button:hover{border-color:var(--accent)}
-button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
-button.primary:hover{filter:brightness(1.08)}
-button.small{padding:5px 10px;font-size:.82rem}
-button:disabled{opacity:.55;cursor:default}
-.hint{font-size:.85rem;color:var(--muted)}
+.spread{justify-content:space-between}
 
-/* score strip */
-.scores{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px}
-@media (max-width:820px){.scores{grid-template-columns:1fr}}
-.score .num{font-family:var(--display);font-size:2.6rem;font-weight:800;line-height:1;font-variant-numeric:tabular-nums}
-.score .num small{font-size:1rem;color:var(--muted);font-weight:600}
-.bar{height:8px;border-radius:99px;background:var(--line);overflow:hidden}
-.bar>i{display:block;height:100%;background:var(--accent);border-radius:99px;transition:width .4s}
-.verdict{font-size:1rem}
+input[type=text],input[type=password],textarea{width:100%;font:inherit;color:var(--ink);background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:11px 13px;transition:border-color .15s,background .15s}
+input:hover,textarea:hover{border-color:var(--line-strong)}
+input:focus,textarea:focus{outline:none;border-color:var(--accent);background:var(--sheet);box-shadow:0 0 0 3px var(--accent-soft)}
+textarea{resize:vertical;min-height:240px;font-size:13.5px;line-height:1.55}
+#jobTitle{font-weight:600}
 
-/* highlighted posting */
-.posting{white-space:pre-wrap;font-size:13.5px;line-height:1.65;max-height:520px;overflow:auto;padding-right:6px}
-.posting mark{border-radius:3px;padding:0 2px}
+button{font:inherit;font-weight:600;font-size:.92rem;border-radius:10px;border:1px solid var(--line-strong);background:var(--sheet);color:var(--ink);padding:10px 16px;cursor:pointer;transition:background .15s,border-color .15s,transform .05s}
+button:hover:not(:disabled){border-color:var(--ink)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:focus-visible{outline:3px solid var(--accent-soft);outline-offset:1px;border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 6px 16px -8px var(--accent)}
+button.primary:hover:not(:disabled){background:var(--accent-hover);border-color:var(--accent-hover)}
+button.small{padding:6px 11px;font-size:.8rem;border-radius:8px}
+button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.status-line{font-size:.88rem;color:var(--muted);min-height:1.3em}
+.status-line:empty{display:none}
+.status-line.err{color:var(--bad);font-weight:500}
+
+/* scoreboard */
+.scores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1.6fr);gap:20px}
+@media (max-width:860px){.scores{grid-template-columns:1fr 1fr}.scores .verdict-card{grid-column:1/-1}}
+@media (max-width:480px){.scores{grid-template-columns:1fr}}
+.gauge-card{flex-direction:row;align-items:center;gap:18px}
+.gauge{--p:0;--c:var(--muted);flex:none;width:104px;height:104px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--p)*1%),var(--line) 0);transition:--p .6s}
+.gauge[data-level="high"]{--c:var(--good)} .gauge[data-level="mid"]{--c:var(--mid)} .gauge[data-level="low"]{--c:var(--bad)}
+.gauge .num{width:80px;height:80px;border-radius:50%;background:var(--sheet);display:flex;align-items:center;justify-content:center;gap:1px;
+  font-family:var(--display);font-weight:800;font-size:1.75rem;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.gauge .num small{font-size:.75rem;color:var(--muted);font-weight:600;letter-spacing:0;margin-left:1px}
+.gauge-card .txt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.verdict-card{background:var(--mast);color:var(--mast-ink);border-color:transparent}
+.verdict-card .label{color:var(--mast-muted)}
+.verdict{margin:0;font-size:1.02rem;line-height:1.5}
+
+/* marked-up posting */
+.posting{white-space:pre-wrap;font-size:13.5px;line-height:1.75;max-height:540px;overflow:auto;padding-right:8px;color:var(--ink)}
+.posting mark{border-radius:3px;padding:1px 2px}
 .posting mark.m{background:var(--hl);color:var(--hl-ink)}
-.posting mark.x{background:transparent;color:inherit;text-decoration:underline wavy var(--bad);text-underline-offset:3px}
-.legend{display:flex;flex-wrap:wrap;gap:14px;font-size:.8rem;color:var(--muted)}
-.legend span::before{content:"";display:inline-block;width:12px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
-.legend .lm::before{background:var(--hl)}
-.legend .lx::before{border-bottom:2px solid var(--bad);height:6px}
+.posting mark.x{background:transparent;color:inherit;text-decoration:underline wavy var(--bad);text-decoration-thickness:1.5px;text-underline-offset:4px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.78rem;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend .lm::before{content:"";width:14px;height:10px;border-radius:2px;background:var(--hl)}
+.legend .lx::before{content:"";width:14px;height:6px;border-bottom:2px dotted var(--bad)}
 
-.chips{display:flex;flex-wrap:wrap;gap:6px}
-.chip{font-size:.8rem;font-weight:600;padding:3px 9px;border-radius:99px;border:1px solid transparent}
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-size:.8rem;font-weight:600;padding:4px 11px;border-radius:999px}
 .chip.ok{background:var(--good-soft);color:var(--good)}
+.chip.ok::before{content:"✓ ";font-weight:700}
 .chip.no{background:var(--bad-soft);color:var(--bad)}
-.chip.neutral{background:var(--accent-soft);color:var(--accent)}
+.chip.neutral{background:var(--navy-soft);color:var(--ink)}
+.skillgroup{display:flex;flex-direction:column;gap:8px}
 
 /* requirements */
-.reqs{display:flex;flex-direction:column}
-.req{display:grid;grid-template-columns:88px minmax(0,1fr);gap:12px;padding:12px 0;border-top:1px solid var(--line)}
-.req:first-child{border-top:0}
-.req .what{font-weight:600}
-.req .ev{color:var(--muted);font-size:.9rem}
-.status{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:5px;align-self:start;text-align:center}
+.reqs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+@media (max-width:760px){.reqs{grid-template-columns:1fr}}
+.req{display:grid;grid-template-columns:78px minmax(0,1fr);gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.what{font-weight:600}
+.ev{color:var(--muted);font-size:.88rem;margin-top:2px}
+.status{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 0;border-radius:6px;align-self:start;text-align:center}
 .status.strong{background:var(--good-soft);color:var(--good)}
-.status.partial{background:var(--warn-soft);color:var(--warn)}
+.status.partial{background:var(--mid-soft);color:var(--mid)}
 .status.gap{background:var(--bad-soft);color:var(--bad)}
+.badge{font-size:.76rem;font-weight:600;color:var(--muted);background:var(--ground);border-radius:999px;padding:4px 11px}
 
 /* bullets */
-.bullets{display:flex;flex-direction:column;gap:14px;counter-reset:b}
-.bl{border:1px solid var(--line);border-radius:8px;padding:14px;display:flex;flex-direction:column;gap:8px;counter-increment:b}
+.bullets{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;counter-reset:b}
+@media (max-width:420px){.bullets{grid-template-columns:1fr}}
+.bullets>.hint{grid-column:1/-1;margin:0}
+.bl{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:9px;counter-increment:b;background:var(--sheet)}
 .bl .head{display:flex;justify-content:space-between;gap:10px;align-items:center}
-.bl .rank{font-family:var(--mono);font-size:.78rem;color:var(--muted)}
+.bl .rank{font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:999px}
 .bl .rank::before{content:"Lead #" counter(b)}
-.bl .orig{color:var(--muted);font-size:.88rem;text-decoration:line-through;text-decoration-color:var(--line)}
-.bl .new{font-weight:500}
-.bl .why{font-size:.85rem;color:var(--accent)}
+.bl .new{font-weight:500;line-height:1.5}
+.bl .orig{color:var(--muted);font-size:.84rem;border-left:2px solid var(--line);padding-left:10px}
+.bl .orig::before{content:"Was: ";font-weight:600}
+.bl .why{font-size:.84rem;color:var(--muted)}
+.bl .why::before{content:"Why: ";font-weight:600;color:var(--ink)}
 .tags{display:flex;flex-wrap:wrap;gap:5px}
-.tags span{font-family:var(--mono);font-size:.72rem;background:var(--hl);color:var(--hl-ink);padding:1px 6px;border-radius:3px}
+.tags span{font-family:var(--mono);font-size:.7rem;background:var(--hl);color:var(--hl-ink);padding:2px 7px;border-radius:4px}
 
-ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:6px}
-.quote{border-left:3px solid var(--hl);padding:4px 0 4px 14px;font-size:1rem}
-.badge{font-size:.75rem;font-weight:600;color:var(--muted);border:1px dashed var(--line);border-radius:6px;padding:3px 8px}
-.status-line{font-size:.9rem;color:var(--muted);min-height:1.4em}
-.status-line.err{color:var(--bad)}
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
+.quote{border-left:4px solid var(--hl);padding:6px 0 6px 16px;font-size:1rem;margin:0}
 
-.history{display:flex;flex-direction:column}
-.hist{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:12px;align-items:center;padding:10px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
-.hist:first-child{border-top:0}
-.hist .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.hist .d{font-size:.8rem;color:var(--muted)}
-details summary{cursor:pointer;font-weight:600}
-
-/* tailored CV preview: a sheet of A4 */
-.cvwrap{display:grid;grid-template-columns:minmax(0,1fr) 260px;gap:18px;align-items:start}
+/* tailored CV: a real sheet */
+.cvwrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:22px;align-items:start}
 @media (max-width:900px){.cvwrap{grid-template-columns:1fr}}
-.cvdoc{background:var(--paper);border:1px solid var(--line);box-shadow:0 1px 0 var(--line),0 8px 24px -16px rgba(0,0,0,.35);border-radius:4px;padding:36px 40px;font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;font-size:13px;line-height:1.45;max-height:760px;overflow:auto;min-width:0}
-@media (max-width:600px){.cvdoc{padding:20px 18px}}
-.cvdoc .cv-name{text-align:center;font-size:22px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
-.cvdoc .cv-headline{text-align:center;color:var(--accent);font-weight:600}
-.cvdoc .cv-contact{text-align:center;color:var(--muted);font-size:12px;margin-bottom:6px}
-.cvdoc .cv-h{margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid var(--ink);font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:12.5px;color:var(--accent)}
+.sheetbed{background:var(--ground);border-radius:12px;padding:22px;min-width:0}
+@media (max-width:600px){.sheetbed{padding:10px}}
+.cvdoc{background:var(--paper);color:var(--paper-ink);border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.12),0 18px 40px -22px rgba(0,0,0,.45);
+  padding:40px 44px;font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;font-size:13px;line-height:1.45;max-height:820px;overflow:auto;max-width:820px;margin:0 auto}
+@media (max-width:600px){.cvdoc{padding:22px 18px}}
+.cvdoc .hint{color:var(--paper-muted);text-align:center;padding:40px 0}
+.cvdoc .cv-name{text-align:center;font-size:23px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.cvdoc .cv-headline{text-align:center;color:var(--paper-accent);font-weight:700}
+.cvdoc .cv-contact{text-align:center;color:var(--paper-muted);font-size:12px;margin-bottom:6px}
+.cvdoc .cv-h{margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid var(--paper-ink);font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:12.5px;color:var(--paper-accent)}
 .cvdoc .cv-role{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px}
-.cvdoc .cv-role b{font-weight:700}
-.cvdoc .cv-role span.d{color:var(--muted);white-space:nowrap}
+.cvdoc .cv-role span.d{color:var(--paper-muted);white-space:nowrap}
 .cvdoc ul{margin:2px 0 0;padding-left:18px}
 .cvdoc li{margin:2px 0}
 .cvdoc p{margin:2px 0}
-.cvchanges{display:flex;flex-direction:column;gap:8px;font-size:.9rem}
+.cvchanges{display:flex;flex-direction:column;gap:10px;font-size:.9rem;position:sticky;top:16px}
+.cvchanges ul.plain li::marker{color:var(--accent)}
+
+/* history */
+.history{display:flex;flex-direction:column}
+.hist{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.hist:first-child{border-top:0}
+@media (max-width:560px){.hist{grid-template-columns:1fr}}
+.hist .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist .d{font-size:.8rem;color:var(--muted)}
+footer{color:var(--muted);font-size:.8rem;text-align:center;margin-top:20px}
+
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 </style>
+
 </head>
 <body>
-<div class="wrap">
-  <header>
-    <div>
-      <h1>CV <mark>Fit</mark></h1>
-      <p class="sub">Paste a job posting. See what in your CV already matches, what's missing, and which bullets to lead with.</p>
+<header class="mast gutter">
+  <div class="inner">
+    <div class="brand">
+      <span class="eyebrow">CV tailoring tool</span>
+      <h1>CV <span class="swash"><span>Fit</span></span></h1>
+      <p class="tag">Paste a job posting. See what already matches, what's missing, and get a CV rewritten for that role.</p>
     </div>
-    <span class="badge" id="ownerBadge">CV: Fathima Isha Nawaz</span>
-  </header>
+    <div class="brand" style="align-items:flex-start">
+      <ol class="steps">
+        <li><b>1</b>Paste the posting</li>
+        <li><b>2</b>Check your fit</li>
+        <li><b>3</b>Tailor your CV</li>
+      </ol>
+      <span class="who" id="ownerBadge">CV loaded: <strong>Fathima Isha Nawaz</strong></span>
+    </div>
+  </div>
+</header>
 
-  <section class="grid2">
-    <div class="panel">
-      <span class="label">Job posting</span>
-      <input type="text" id="jobTitle" placeholder="Company – Role (e.g. Emirates – Junior Data Analyst)">
-      <textarea id="jd" rows="14" placeholder="Paste the full job description here"></textarea>
-      <div class="row">
-        <button class="primary" id="aiBtn">Get AI suggestions</button>
-        <button id="stopBtn" hidden>Stop</button>
-        <button id="saveBtn">Save to history</button>
-        <button id="clearBtn">New posting</button>
+<main class="page gutter">
+  <div class="inner">
+
+    <section class="grid2">
+      <div class="panel">
+        <div class="row spread"><h3>Job posting</h3><span class="label">Step 1</span></div>
+        <input type="text" id="jobTitle" placeholder="Company – Role (e.g. Emirates – Junior Data Analyst)">
+        <textarea id="jd" rows="14" placeholder="Paste the full job description here"></textarea>
+        <div class="row">
+          <button class="primary" id="aiBtn">Get AI suggestions</button>
+          <button id="stopBtn" hidden>Stop</button>
+          <button id="saveBtn">Save to history</button>
+          <button id="clearBtn">New posting</button>
+        </div>
+        <div class="status-line" id="aiStatus"></div>
+        <div class="row" id="codeRow" hidden>
+          <input type="password" id="accessCode" placeholder="Access code" style="max-width:220px">
+          <button class="small" id="codeSave">Save and try again</button>
+        </div>
       </div>
-      <div class="row" id="codeRow" hidden>
-        <input type="password" id="accessCode" placeholder="Access code" style="max-width:220px">
-        <button class="small" id="codeSave">Save code</button>
+      <div class="panel">
+        <div class="row spread">
+          <h3>Your CV</h3>
+          <button class="small" id="resetCv">Reset to saved CV</button>
+        </div>
+        <div class="row">
+          <input type="text" id="cvName" placeholder="Name on CV" style="flex:1 1 170px">
+          <input type="text" id="cvContact" placeholder="City | phone | email | LinkedIn" style="flex:2 1 240px">
+        </div>
+        <textarea id="cv" rows="12"></textarea>
+        <p class="hint" style="margin:0">Edits stay in this browser. Bullets are lines that start with •</p>
       </div>
-      <div class="status-line" id="aiStatus"></div>
-    </div>
-    <div class="panel">
-      <div class="row" style="justify-content:space-between">
-        <span class="label">Your CV</span>
-        <button class="small" id="resetCv">Reset to saved CV</button>
+    </section>
+
+    <div class="section-head"><span class="n">02</span><h2>Your fit</h2><p>How your CV reads against this posting</p></div>
+
+    <section class="scores">
+      <div class="panel gauge-card">
+        <div class="gauge" id="kwGauge"><div class="num" id="kwNum">–</div></div>
+        <div class="txt"><span class="label">Keyword coverage</span><span class="hint" id="kwNote">Instant check against a skills list</span></div>
       </div>
-      <div class="row">
-        <input type="text" id="cvName" placeholder="Name on CV" style="flex:1 1 180px">
-        <input type="text" id="cvContact" placeholder="City | phone | email | LinkedIn" style="flex:2 1 260px">
+      <div class="panel gauge-card">
+        <div class="gauge" id="aiGauge"><div class="num" id="aiNum">–</div></div>
+        <div class="txt"><span class="label">AI fit score</span><span class="hint" id="aiNote">Reads meaning, not just words</span></div>
       </div>
-      <textarea id="cv" rows="12"></textarea>
-      <p class="hint">Edits stay in this browser. Bullets are lines that start with •</p>
-    </div>
-  </section>
-
-  <section class="scores">
-    <div class="panel score">
-      <span class="label">Keyword coverage</span>
-      <div class="num" id="kwNum">–</div>
-      <div class="bar"><i id="kwBar" style="width:0"></i></div>
-      <span class="hint" id="kwNote">Instant check against a skills list</span>
-    </div>
-    <div class="panel score">
-      <span class="label">AI fit score</span>
-      <div class="num" id="aiNum">–</div>
-      <div class="bar"><i id="aiBar" style="width:0"></i></div>
-      <span class="hint" id="aiNote">Reads meaning, not just words</span>
-    </div>
-    <div class="panel">
-      <span class="label">Verdict</span>
-      <p class="verdict" id="verdict" style="margin:0">Run AI suggestions for a plain-English verdict.</p>
-    </div>
-  </section>
-
-  <section class="grid2">
-    <div class="panel">
-      <div class="row" style="justify-content:space-between">
-        <h2>The posting, marked up</h2>
-        <div class="legend"><span class="lm">In your CV</span><span class="lx">Missing</span></div>
+      <div class="panel verdict-card">
+        <span class="label">Verdict</span>
+        <p class="verdict" id="verdict">Run AI suggestions for a plain-English verdict.</p>
       </div>
-      <div class="posting" id="posting"></div>
-    </div>
-    <div class="panel">
-      <h2>Skills they ask for</h2>
-      <div><span class="label">You have</span></div>
-      <div class="chips" id="have"></div>
-      <div><span class="label">Missing from your CV</span></div>
-      <div class="chips" id="miss"></div>
-      <div id="addKwWrap" hidden>
-        <span class="label">Add these words, if true for you</span>
-        <div class="chips" id="addKw" style="margin-top:6px"></div>
+    </section>
+
+    <section class="grid2">
+      <div class="panel">
+        <div class="row spread">
+          <h3>The posting, marked up</h3>
+          <div class="legend"><span class="lm">In your CV</span><span class="lx">Missing</span></div>
+        </div>
+        <div class="posting" id="posting"></div>
       </div>
-    </div>
-  </section>
-
-  <section class="panel" id="reqPanel" hidden>
-    <div class="row" style="justify-content:space-between"><h2>Requirement by requirement</h2><span class="badge" id="reqSrc"></span></div>
-    <div class="reqs" id="reqs"></div>
-  </section>
-
-  <section class="panel">
-    <div class="row" style="justify-content:space-between">
-      <h2>Lead with these bullets</h2>
-      <span class="badge" id="bulletSrc">Ranked by keyword overlap</span>
-    </div>
-    <div class="bullets" id="bullets"></div>
-  </section>
-
-  <section class="grid2" id="extras" hidden>
-    <div class="panel">
-      <div class="row" style="justify-content:space-between"><h2>Summary, tailored</h2><button class="small" id="copySummary">Copy</button></div>
-      <p class="quote" id="summary" style="margin:0"></p>
-      <span class="label">Cover letter angle</span>
-      <p id="angle" style="margin:0"></p>
-    </div>
-    <div class="panel">
-      <h2>Watch-outs</h2>
-      <ul class="plain" id="watch"></ul>
-    </div>
-  </section>
-
-  <section class="panel" id="cvPanel">
-    <div class="row" style="justify-content:space-between">
-      <div><h2>Tailored CV</h2><span class="hint" id="cvSrc">A full CV rewritten for this posting, using only facts from yours.</span></div>
-      <div class="row">
-        <button class="primary" id="cvBtn">Build tailored CV</button>
-        <button id="cvStop" hidden>Stop</button>
-        <button id="dlBtn" disabled>Download for Word</button>
-        <button id="copyCv" disabled>Copy text</button>
+      <div class="panel">
+        <h3>Skills they ask for</h3>
+        <div class="skillgroup"><span class="label">You have</span><div class="chips" id="have"></div></div>
+        <div class="skillgroup"><span class="label">Missing from your CV</span><div class="chips" id="miss"></div></div>
+        <div class="skillgroup" id="addKwWrap" hidden><span class="label">Add these words, if true for you</span><div class="chips" id="addKw"></div></div>
       </div>
-    </div>
-    <div class="status-line" id="cvStatus"></div>
-    <div class="cvwrap">
-      <div class="cvdoc" id="cvdoc"></div>
-      <aside class="cvchanges" id="cvChangesWrap" hidden>
-        <span class="label">What changed</span>
-        <ul class="plain" id="cvChanges"></ul>
-        <p class="hint">Read it through before sending. Anything that isn't true for you, delete in Word.</p>
-      </aside>
-    </div>
-  </section>
+    </section>
 
-  <section class="panel">
-    <h2>History</h2>
-    <div class="history" id="history"></div>
-  </section>
-</div>
+    <section class="panel" id="reqPanel" hidden>
+      <div class="row spread"><h3>Requirement by requirement</h3><span class="badge" id="reqSrc"></span></div>
+      <div class="reqs" id="reqs"></div>
+    </section>
+
+    <div class="section-head"><span class="n">03</span><h2>Tailor it</h2><p>Lead with the right bullets, then build the full CV</p></div>
+
+    <section class="panel">
+      <div class="row spread">
+        <h3>Lead with these bullets</h3>
+        <span class="badge" id="bulletSrc">Ranked by keyword overlap</span>
+      </div>
+      <div class="bullets" id="bullets"></div>
+    </section>
+
+    <section class="grid2" id="extras" hidden>
+      <div class="panel">
+        <div class="row spread"><h3>Summary, tailored</h3><button class="small" id="copySummary">Copy</button></div>
+        <p class="quote" id="summary"></p>
+        <span class="label">Cover letter angle</span>
+        <p id="angle" style="margin:0"></p>
+      </div>
+      <div class="panel">
+        <h3>Watch-outs</h3>
+        <ul class="plain" id="watch"></ul>
+      </div>
+    </section>
+
+    <section class="panel" id="cvPanel">
+      <div class="row spread">
+        <div><h3>Tailored CV</h3><span class="hint" id="cvSrc">A full CV rewritten for this posting, using only facts from yours.</span></div>
+        <div class="row">
+          <button class="primary" id="cvBtn">Build tailored CV</button>
+          <button id="cvStop" hidden>Stop</button>
+          <button id="dlBtn" disabled>Download for Word</button>
+          <button id="copyCv" disabled>Copy text</button>
+        </div>
+      </div>
+      <div class="status-line" id="cvStatus"></div>
+      <div class="cvwrap">
+        <div class="sheetbed"><div class="cvdoc" id="cvdoc"></div></div>
+        <aside class="cvchanges" id="cvChangesWrap" hidden>
+          <span class="label">What changed</span>
+          <ul class="plain" id="cvChanges"></ul>
+          <p class="hint" style="margin:0">Read it through before sending. Anything that isn't true for you, delete in Word.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>History</h3>
+      <div class="history" id="history"></div>
+    </section>
+
+    <footer>CV Fit · built by Fathima Isha Nawaz</footer>
+  </div>
+</main>
 
 <script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
 <script>
@@ -490,6 +568,7 @@ const store = {
   get(k, d){ try{ const v = localStorage.getItem(k); return v==null? d : JSON.parse(v); }catch{ return d; } },
   set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
 };
+function setGauge(id,v){ const g=$(id+"Gauge"); if(!g) return; v=Math.max(0,Math.min(100,Number(v)||0)); g.style.setProperty("--p",v); g.dataset.level = v===0 ? "" : v>=70 ? "high" : v>=45 ? "mid" : "low"; }
 function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
 function hits(re, text){ re.lastIndex=0; return re.test(text); }
 async function copyText(t, btn){
@@ -513,7 +592,7 @@ function analyse(){
 
   const pct = asked.length ? Math.round(have.length/asked.length*100) : null;
   $("kwNum").innerHTML = pct==null ? "–" : `${pct}<small>%</small>`;
-  $("kwBar").style.width = (pct||0)+"%";
+  setGauge("kw", pct||0);
   $("kwNote").textContent = asked.length ? `${have.length} of ${asked.length} skills in the posting appear in your CV` : "Paste a posting to start";
 
   const fill = (box, list, cls) => { box.replaceChildren(...(list.length? list.map(([n])=>el("span","chip "+cls,n)) : [el("span","hint","None")])); };
@@ -557,7 +636,7 @@ function renderKeywordBullets(cv, asked){
 function renderAI(r, sourceLabel){
   const s = Math.max(0, Math.min(100, Number(r.score)||0));
   $("aiNum").innerHTML = `${s}<small>/100</small>`;
-  $("aiBar").style.width = s+"%";
+  setGauge("ai", s);
   $("aiNote").textContent = sourceLabel;
   $("verdict").textContent = r.verdict || "";
 
@@ -591,7 +670,7 @@ function renderAI(r, sourceLabel){
 
 function clearAI(){
   ai=null; aiForJd=null;
-  $("aiNum").textContent="–"; $("aiBar").style.width="0";
+  $("aiNum").textContent="–"; setGauge("ai",0);
   $("aiNote").textContent="Reads meaning, not just words";
   $("verdict").textContent="Run AI suggestions for a plain-English verdict.";
   $("reqPanel").hidden=true; $("extras").hidden=true; $("addKwWrap").hidden=true;
@@ -603,8 +682,9 @@ const aiReady = () => true;
 async function askClaude(kind, p, signal){
   const res = await fetch("/api/analyze", {method:"POST", headers:{"content-type":"application/json"},
     body: JSON.stringify({kind, cv:p.cv, jd:p.jd, title:p.title, code:store.get("cvfit.code","")}), signal});
-  const data = await res.json().catch(()=>({}));
-  if(!res.ok) throw {code: data.code || "upstream_error"};
+  const raw = await res.text();
+  let data = {}; try{ data = JSON.parse(raw); }catch{}
+  if(!res.ok) throw {code: data.code || (res.status===504 ? "timeout" : "upstream_error"), detail: data.detail || (data.code ? "" : `HTTP ${res.status}`)};
   return data.result;
 }
 async function saveFile(name, blob){
@@ -613,8 +693,20 @@ async function saveFile(name, blob){
   document.body.append(a); a.click(); a.remove();
   setTimeout(()=>URL.revokeObjectURL(url), 2000);
 }
-function showCodeRow(){ $("codeRow").hidden=false; $("accessCode").focus(); }
-$("codeSave").onclick=()=>{ store.set("cvfit.code",$("accessCode").value.trim()); $("codeRow").hidden=true; $("aiStatus").className="status-line"; $("aiStatus").textContent="Code saved. Try again."; };
+let codeFor="analysis";
+function showCodeRow(kind){
+  codeFor=kind;
+  const st = kind==="cv" ? $("cvStatus") : $("aiStatus");
+  st.after($("codeRow"));            // put the box right under the message that asked for it
+  $("codeRow").hidden=false; $("accessCode").focus();
+}
+function saveCode(){
+  const v=$("accessCode").value.trim(); if(!v) return;
+  store.set("cvfit.code",v); $("codeRow").hidden=true;
+  run(codeFor);                      // retry straight away
+}
+$("codeSave").onclick=saveCode;
+$("accessCode").addEventListener("keydown",e=>{ if(e.key==="Enter") saveCode(); });
 setTimeout(()=>setBusy(false));
 /* AI-BRIDGE END */
 
@@ -626,7 +718,9 @@ const ERR = {
   invalid_json:"The answer came back in an unexpected format. Try again.",
   refused:"Claude couldn't answer this one. Try trimming the posting.",
   prompt_too_large:"The posting or CV is too long. Trim it and try again.",
-  bad_code:"Enter the access code to use AI features.",
+  bad_code:"Enter your access code below. It's the ACCESS_CODE you set in Vercel.",
+  cut_off:"The answer was too long and got cut off. Try again, or trim the job posting.",
+  timeout:"The server took too long to answer. Try again.",
   not_configured:"AI isn't set up on this site yet. Add ANTHROPIC_API_KEY in Vercel.",
   unavailable:"AI features work when this page is opened in Claude.",
 };
@@ -660,8 +754,8 @@ async function run(kind){
   }catch(e){
     if(e?.code==="cancelled" || e?.name==="AbortError"){ st.textContent="Stopped."; }
     else{
-      st.className="status-line err"; st.textContent = ERR[e?.code] || "Something went wrong reaching Claude. Try again.";
-      if(e?.code==="bad_code" && typeof showCodeRow==="function") showCodeRow();
+      st.className="status-line err"; st.textContent = (ERR[e?.code] || "Something went wrong reaching Claude. Try again.") + (e?.detail ? ` (Details: ${e.detail})` : "");
+      if(e?.code==="bad_code" && typeof showCodeRow==="function") showCodeRow(kind);
     }
   }finally{ busy=false; setBusy(false); }
 }
