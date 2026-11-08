@@ -1,0 +1,930 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Match a CV against a job posting: skills you have, gaps, and a tailored CV to download for Word.">
+<title>CV Fit</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=Figtree:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500&display=swap">
+<style>
+/* Layout: a recruiter's review desk. A navy masthead carries the three real steps (paste, check, tailor);
+   the work sits on white sheets below, with a yellow highlighter marking what already matches. */
+:root{
+  --ground:#eef1f6; --sheet:#ffffff; --ink:#18203a; --muted:#5d6680; --line:#dde2ec; --line-strong:#c6cddc;
+  --mast:#18203a; --mast-ink:#f4f6fb; --mast-muted:#a9b2cc;
+  --accent:#e4573d; --accent-hover:#cf4630; --accent-ink:#ffffff; --accent-soft:#fdebe6;
+  --navy-soft:#e7ebf6;
+  --hl:#ffd84d; --hl-ink:#2b2200;
+  --good:#16804f; --good-soft:#dff3e8; --mid:#a66a00; --mid-soft:#fcf0d2; --bad:#c2402b; --bad-soft:#fbe4df;
+  --paper:#ffffff; --paper-ink:#1b1f2a; --paper-muted:#5f6675; --paper-accent:#1d3f8f;
+  --shadow:0 1px 2px rgba(24,32,58,.06),0 6px 20px -10px rgba(24,32,58,.18);
+  --display:"Bricolage Grotesque","Avenir Next","Segoe UI",system-ui,sans-serif;
+  --body:"Figtree","Segoe UI",system-ui,-apple-system,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;
+  --r:14px;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --ground:#0e1322; --sheet:#161d31; --ink:#e8ecf6; --muted:#9aa4be; --line:#273150; --line-strong:#36426a;
+  --mast:#0a0f1c; --mast-ink:#f4f6fb; --mast-muted:#8d97b4;
+  --accent:#f06a4f; --accent-hover:#ff7f66; --accent-ink:#1a0a05; --accent-soft:#3a1d18;
+  --navy-soft:#1f2842;
+  --hl:#e9c437; --hl-ink:#1d1700;
+  --good:#5ad397; --good-soft:#123326; --mid:#f0bd52; --mid-soft:#3a2d10; --bad:#ff8d78; --bad-soft:#3d1c17;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); color-scheme:dark}}
+:root[data-theme="dark"]{
+  --ground:#0e1322; --sheet:#161d31; --ink:#e8ecf6; --muted:#9aa4be; --line:#273150; --line-strong:#36426a;
+  --mast:#0a0f1c; --mast-ink:#f4f6fb; --mast-muted:#8d97b4;
+  --accent:#f06a4f; --accent-hover:#ff7f66; --accent-ink:#1a0a05; --accent-soft:#3a1d18;
+  --navy-soft:#1f2842;
+  --hl:#e9c437; --hl-ink:#1d1700;
+  --good:#5ad397; --good-soft:#123326; --mid:#f0bd52; --mid-soft:#3a2d10; --bad:#ff8d78; --bad-soft:#3d1c17;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 8px 24px -12px rgba(0,0,0,.6); color-scheme:dark}
+
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--body);font-size:15px;line-height:1.55}
+[hidden]{display:none!important}
+.gutter{padding-left:max(20px,env(safe-area-inset-left,0px));padding-right:max(20px,env(safe-area-inset-right,0px))}
+.inner{max-width:1180px;margin:0 auto}
+
+/* masthead */
+.mast{background:var(--mast);color:var(--mast-ink);padding-block:34px 92px;position:relative;overflow:hidden}
+.mast::after{content:"";position:absolute;right:-120px;top:-140px;width:420px;height:420px;border-radius:50%;
+  background:radial-gradient(circle,rgba(228,87,61,.28),transparent 65%);pointer-events:none}
+.mast .inner{display:flex;flex-wrap:wrap;gap:24px;align-items:flex-end;justify-content:space-between;position:relative;z-index:1}
+.brand{display:flex;flex-direction:column;gap:10px;min-width:0}
+.eyebrow{font-family:var(--mono);font-size:.72rem;letter-spacing:.14em;text-transform:uppercase;color:var(--mast-muted)}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2.4rem,5vw,3.6rem);line-height:.95;letter-spacing:-.03em;margin:0}
+h1 .swash{position:relative;white-space:nowrap;isolation:isolate;padding:0 .04em}
+h1 .swash::before{content:"";position:absolute;left:-.06em;right:-.08em;top:.1em;bottom:-.02em;background:var(--hl);opacity:.9;border-radius:3px;transform:skewX(-8deg);z-index:-1}
+h1 .swash span{position:relative;color:var(--mast)}
+.tag{color:var(--mast-muted);max-width:48ch;margin:0;font-size:1rem}
+.steps{display:flex;flex-wrap:wrap;gap:8px;list-style:none;margin:0;padding:0}
+.steps li{display:flex;align-items:center;gap:8px;border:1px solid rgba(255,255,255,.14);border-radius:999px;padding:6px 14px 6px 6px;font-size:.86rem;color:var(--mast-ink)}
+.steps b{display:grid;place-items:center;width:24px;height:24px;border-radius:50%;background:rgba(255,255,255,.1);font-family:var(--mono);font-size:.72rem}
+.steps li:first-child b{background:var(--accent);color:var(--accent-ink)}
+.who{font-size:.8rem;color:var(--mast-muted)}
+.who strong{color:var(--mast-ink);font-weight:600}
+
+/* page */
+.page{margin-top:-64px;padding-block:0 72px;position:relative;z-index:2}
+.page .inner{display:flex;flex-direction:column;gap:22px}
+.section-head{display:flex;align-items:baseline;gap:12px;margin:26px 2px 0}
+.section-head .n{font-family:var(--mono);font-size:.78rem;color:var(--accent);font-weight:500}
+.section-head h2{font-family:var(--display);font-weight:800;font-size:1.45rem;letter-spacing:-.015em;margin:0}
+.section-head p{margin:0;color:var(--muted);font-size:.92rem}
+h3{font-family:var(--display);font-weight:600;font-size:1.08rem;letter-spacing:-.01em;margin:0;text-wrap:balance}
+.label{font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.hint{font-size:.86rem;color:var(--muted)}
+
+.panel{background:var(--sheet);border:1px solid var(--line);border-radius:var(--r);padding:22px;display:flex;flex-direction:column;gap:14px;min-width:0;box-shadow:var(--shadow)}
+.grid2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:20px}
+@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+.spread{justify-content:space-between}
+
+input[type=text],input[type=password],textarea{width:100%;font:inherit;color:var(--ink);background:var(--ground);border:1px solid var(--line);border-radius:10px;padding:11px 13px;transition:border-color .15s,background .15s}
+input:hover,textarea:hover{border-color:var(--line-strong)}
+input:focus,textarea:focus{outline:none;border-color:var(--accent);background:var(--sheet);box-shadow:0 0 0 3px var(--accent-soft)}
+textarea{resize:vertical;min-height:240px;font-size:13.5px;line-height:1.55}
+#jobTitle{font-weight:600}
+
+button{font:inherit;font-weight:600;font-size:.92rem;border-radius:10px;border:1px solid var(--line-strong);background:var(--sheet);color:var(--ink);padding:10px 16px;cursor:pointer;transition:background .15s,border-color .15s,transform .05s}
+button:hover:not(:disabled){border-color:var(--ink)}
+button:active:not(:disabled){transform:translateY(1px)}
+button:focus-visible{outline:3px solid var(--accent-soft);outline-offset:1px;border-color:var(--accent)}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);box-shadow:0 6px 16px -8px var(--accent)}
+button.primary:hover:not(:disabled){background:var(--accent-hover);border-color:var(--accent-hover)}
+button.small{padding:6px 11px;font-size:.8rem;border-radius:8px}
+button:disabled{opacity:.45;cursor:not-allowed;box-shadow:none}
+.status-line{font-size:.88rem;color:var(--muted);min-height:1.3em}
+.status-line:empty{display:none}
+.status-line.err{color:var(--bad);font-weight:500}
+
+/* scoreboard */
+.scores{display:grid;grid-template-columns:repeat(2,minmax(0,1fr)) minmax(0,1.6fr);gap:20px}
+@media (max-width:860px){.scores{grid-template-columns:1fr 1fr}.scores .verdict-card{grid-column:1/-1}}
+@media (max-width:480px){.scores{grid-template-columns:1fr}}
+.gauge-card{flex-direction:row;align-items:center;gap:18px}
+.gauge{--p:0;--c:var(--muted);flex:none;width:104px;height:104px;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--c) calc(var(--p)*1%),var(--line) 0);transition:--p .6s}
+.gauge[data-level="high"]{--c:var(--good)} .gauge[data-level="mid"]{--c:var(--mid)} .gauge[data-level="low"]{--c:var(--bad)}
+.gauge .num{width:80px;height:80px;border-radius:50%;background:var(--sheet);display:flex;align-items:center;justify-content:center;gap:1px;
+  font-family:var(--display);font-weight:800;font-size:1.75rem;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.gauge .num small{font-size:.75rem;color:var(--muted);font-weight:600;letter-spacing:0;margin-left:1px}
+.gauge-card .txt{display:flex;flex-direction:column;gap:4px;min-width:0}
+.verdict-card{background:var(--mast);color:var(--mast-ink);border-color:transparent}
+.verdict-card .label{color:var(--mast-muted)}
+.verdict{margin:0;font-size:1.02rem;line-height:1.5}
+
+/* marked-up posting */
+.posting{white-space:pre-wrap;font-size:13.5px;line-height:1.75;max-height:540px;overflow:auto;padding-right:8px;color:var(--ink)}
+.posting mark{border-radius:3px;padding:1px 2px}
+.posting mark.m{background:var(--hl);color:var(--hl-ink)}
+.posting mark.x{background:transparent;color:inherit;text-decoration:underline wavy var(--bad);text-decoration-thickness:1.5px;text-underline-offset:4px}
+.legend{display:flex;flex-wrap:wrap;gap:16px;font-size:.78rem;color:var(--muted)}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend .lm::before{content:"";width:14px;height:10px;border-radius:2px;background:var(--hl)}
+.legend .lx::before{content:"";width:14px;height:6px;border-bottom:2px dotted var(--bad)}
+
+.chips{display:flex;flex-wrap:wrap;gap:7px}
+.chip{font-size:.8rem;font-weight:600;padding:4px 11px;border-radius:999px}
+.chip.ok{background:var(--good-soft);color:var(--good)}
+.chip.ok::before{content:"✓ ";font-weight:700}
+.chip.no{background:var(--bad-soft);color:var(--bad)}
+.chip.neutral{background:var(--navy-soft);color:var(--ink)}
+.skillgroup{display:flex;flex-direction:column;gap:8px}
+
+/* requirements */
+.reqs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:28px}
+@media (max-width:760px){.reqs{grid-template-columns:1fr}}
+.req{display:grid;grid-template-columns:78px minmax(0,1fr);gap:12px;padding:13px 0;border-top:1px solid var(--line)}
+.what{font-weight:600}
+.ev{color:var(--muted);font-size:.88rem;margin-top:2px}
+.status{font-size:.68rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;padding:4px 0;border-radius:6px;align-self:start;text-align:center}
+.status.strong{background:var(--good-soft);color:var(--good)}
+.status.partial{background:var(--mid-soft);color:var(--mid)}
+.status.gap{background:var(--bad-soft);color:var(--bad)}
+.badge{font-size:.76rem;font-weight:600;color:var(--muted);background:var(--ground);border-radius:999px;padding:4px 11px}
+
+/* bullets */
+.bullets{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;counter-reset:b}
+@media (max-width:420px){.bullets{grid-template-columns:1fr}}
+.bullets>.hint{grid-column:1/-1;margin:0}
+.bl{border:1px solid var(--line);border-radius:12px;padding:16px;display:flex;flex-direction:column;gap:9px;counter-increment:b;background:var(--sheet)}
+.bl .head{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.bl .rank{font-family:var(--mono);font-size:.72rem;font-weight:500;color:var(--accent);background:var(--accent-soft);padding:2px 8px;border-radius:999px}
+.bl .rank::before{content:"Lead #" counter(b)}
+.bl .new{font-weight:500;line-height:1.5}
+.bl .orig{color:var(--muted);font-size:.84rem;border-left:2px solid var(--line);padding-left:10px}
+.bl .orig::before{content:"Was: ";font-weight:600}
+.bl .why{font-size:.84rem;color:var(--muted)}
+.bl .why::before{content:"Why: ";font-weight:600;color:var(--ink)}
+.tags{display:flex;flex-wrap:wrap;gap:5px}
+.tags span{font-family:var(--mono);font-size:.7rem;background:var(--hl);color:var(--hl-ink);padding:2px 7px;border-radius:4px}
+
+ul.plain{margin:0;padding-left:18px;display:flex;flex-direction:column;gap:8px}
+.quote{border-left:4px solid var(--hl);padding:6px 0 6px 16px;font-size:1rem;margin:0}
+
+/* tailored CV: a real sheet */
+.cvwrap{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:22px;align-items:start}
+@media (max-width:900px){.cvwrap{grid-template-columns:1fr}}
+.sheetbed{background:var(--ground);border-radius:12px;padding:22px;min-width:0}
+@media (max-width:600px){.sheetbed{padding:10px}}
+.cvdoc{background:var(--paper);color:var(--paper-ink);border-radius:3px;box-shadow:0 1px 3px rgba(0,0,0,.12),0 18px 40px -22px rgba(0,0,0,.45);
+  padding:40px 44px;font-family:Calibri,Carlito,"Segoe UI",Arial,sans-serif;font-size:13px;line-height:1.45;max-height:820px;overflow:auto;max-width:820px;margin:0 auto}
+@media (max-width:600px){.cvdoc{padding:22px 18px}}
+.cvdoc .hint{color:var(--paper-muted);text-align:center;padding:40px 0}
+.cvdoc .cv-name{text-align:center;font-size:23px;font-weight:700;letter-spacing:.05em;text-transform:uppercase}
+.cvdoc .cv-headline{text-align:center;color:var(--paper-accent);font-weight:700}
+.cvdoc .cv-contact{text-align:center;color:var(--paper-muted);font-size:12px;margin-bottom:6px}
+.cvdoc .cv-h{margin:14px 0 6px;padding-bottom:2px;border-bottom:1px solid var(--paper-ink);font-weight:700;text-transform:uppercase;letter-spacing:.07em;font-size:12.5px;color:var(--paper-accent)}
+.cvdoc .cv-role{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:6px}
+.cvdoc .cv-role span.d{color:var(--paper-muted);white-space:nowrap}
+.cvdoc ul{margin:2px 0 0;padding-left:18px}
+.cvdoc li{margin:2px 0}
+.cvdoc p{margin:2px 0}
+.cvchanges{display:flex;flex-direction:column;gap:10px;font-size:.9rem;position:sticky;top:16px}
+.cvchanges ul.plain li::marker{color:var(--accent)}
+
+/* history */
+.history{display:flex;flex-direction:column}
+.hist{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:14px;align-items:center;padding:12px 0;border-top:1px solid var(--line);font-variant-numeric:tabular-nums}
+.hist:first-child{border-top:0}
+@media (max-width:560px){.hist{grid-template-columns:1fr}}
+.hist .t{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hist .d{font-size:.8rem;color:var(--muted)}
+footer{color:var(--muted);font-size:.8rem;text-align:center;margin-top:20px}
+
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+
+</head>
+<body>
+<header class="mast gutter">
+  <div class="inner">
+    <div class="brand">
+      <span class="eyebrow">CV tailoring tool</span>
+      <h1>CV <span class="swash"><span>Fit</span></span></h1>
+      <p class="tag">Paste a job posting. See what already matches, what's missing, and get a CV rewritten for that role.</p>
+    </div>
+    <div class="brand" style="align-items:flex-start">
+      <ol class="steps">
+        <li><b>1</b>Paste the posting</li>
+        <li><b>2</b>Check your fit</li>
+        <li><b>3</b>Tailor your CV</li>
+      </ol>
+      <span class="who" id="ownerBadge">CV loaded: <strong>Fathima Isha Nawaz</strong></span>
+    </div>
+  </div>
+</header>
+
+<main class="page gutter">
+  <div class="inner">
+
+    <section class="grid2">
+      <div class="panel">
+        <div class="row spread"><h3>Job posting</h3><span class="label">Step 1</span></div>
+        <input type="text" id="jobTitle" placeholder="Company – Role (e.g. Emirates – Junior Data Analyst)">
+        <textarea id="jd" rows="14" placeholder="Paste the full job description here"></textarea>
+        <div class="row">
+          <button class="primary" id="aiBtn">Get AI suggestions</button>
+          <button id="stopBtn" hidden>Stop</button>
+          <button id="saveBtn">Save to history</button>
+          <button id="clearBtn">New posting</button>
+        </div>
+        <div class="status-line" id="aiStatus"></div>
+        <div class="row" id="codeRow" hidden>
+          <input type="password" id="accessCode" placeholder="Access code" style="max-width:220px">
+          <button class="small" id="codeSave">Save and try again</button>
+        </div>
+      </div>
+      <div class="panel">
+        <div class="row spread">
+          <h3>Your CV</h3>
+          <button class="small" id="resetCv">Reset to saved CV</button>
+        </div>
+        <div class="row">
+          <input type="text" id="cvName" placeholder="Name on CV" style="flex:1 1 170px">
+          <input type="text" id="cvContact" placeholder="City | phone | email | LinkedIn" style="flex:2 1 240px">
+        </div>
+        <textarea id="cv" rows="12"></textarea>
+        <p class="hint" style="margin:0">Edits stay in this browser. Bullets are lines that start with •</p>
+      </div>
+    </section>
+
+    <div class="section-head"><span class="n">02</span><h2>Your fit</h2><p>How your CV reads against this posting</p></div>
+
+    <section class="scores">
+      <div class="panel gauge-card">
+        <div class="gauge" id="kwGauge"><div class="num" id="kwNum">–</div></div>
+        <div class="txt"><span class="label">Keyword coverage</span><span class="hint" id="kwNote">Instant check against a skills list</span></div>
+      </div>
+      <div class="panel gauge-card">
+        <div class="gauge" id="aiGauge"><div class="num" id="aiNum">–</div></div>
+        <div class="txt"><span class="label">AI fit score</span><span class="hint" id="aiNote">Reads meaning, not just words</span></div>
+      </div>
+      <div class="panel verdict-card">
+        <span class="label">Verdict</span>
+        <p class="verdict" id="verdict">Run AI suggestions for a plain-English verdict.</p>
+      </div>
+    </section>
+
+    <section class="grid2">
+      <div class="panel">
+        <div class="row spread">
+          <h3>The posting, marked up</h3>
+          <div class="legend"><span class="lm">In your CV</span><span class="lx">Missing</span></div>
+        </div>
+        <div class="posting" id="posting"></div>
+      </div>
+      <div class="panel">
+        <h3>Skills they ask for</h3>
+        <div class="skillgroup"><span class="label">You have</span><div class="chips" id="have"></div></div>
+        <div class="skillgroup"><span class="label">Missing from your CV</span><div class="chips" id="miss"></div></div>
+        <div class="skillgroup" id="addKwWrap" hidden><span class="label">Add these words, if true for you</span><div class="chips" id="addKw"></div></div>
+      </div>
+    </section>
+
+    <section class="panel" id="reqPanel" hidden>
+      <div class="row spread"><h3>Requirement by requirement</h3><span class="badge" id="reqSrc"></span></div>
+      <div class="reqs" id="reqs"></div>
+    </section>
+
+    <div class="section-head"><span class="n">03</span><h2>Tailor it</h2><p>Lead with the right bullets, then build the full CV</p></div>
+
+    <section class="panel">
+      <div class="row spread">
+        <h3>Lead with these bullets</h3>
+        <span class="badge" id="bulletSrc">Ranked by keyword overlap</span>
+      </div>
+      <div class="bullets" id="bullets"></div>
+    </section>
+
+    <section class="grid2" id="extras" hidden>
+      <div class="panel">
+        <div class="row spread"><h3>Summary, tailored</h3><button class="small" id="copySummary">Copy</button></div>
+        <p class="quote" id="summary"></p>
+        <span class="label">Cover letter angle</span>
+        <p id="angle" style="margin:0"></p>
+      </div>
+      <div class="panel">
+        <h3>Watch-outs</h3>
+        <ul class="plain" id="watch"></ul>
+      </div>
+    </section>
+
+    <section class="panel" id="cvPanel">
+      <div class="row spread">
+        <div><h3>Tailored CV</h3><span class="hint" id="cvSrc">A full CV rewritten for this posting, using only facts from yours.</span></div>
+        <div class="row">
+          <button class="primary" id="cvBtn">Build tailored CV</button>
+          <button id="cvStop" hidden>Stop</button>
+          <button id="dlBtn" disabled>Download for Word</button>
+          <button id="copyCv" disabled>Copy text</button>
+        </div>
+      </div>
+      <div class="status-line" id="cvStatus"></div>
+      <div class="cvwrap">
+        <div class="sheetbed"><div class="cvdoc" id="cvdoc"></div></div>
+        <aside class="cvchanges" id="cvChangesWrap" hidden>
+          <span class="label">What changed</span>
+          <ul class="plain" id="cvChanges"></ul>
+          <p class="hint" style="margin:0">Read it through before sending. Anything that isn't true for you, delete in Word.</p>
+        </aside>
+      </div>
+    </section>
+
+    <section class="panel">
+      <h3>History</h3>
+      <div class="history" id="history"></div>
+    </section>
+
+    <footer>CV Fit · built by Fathima Isha Nawaz</footer>
+  </div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script>
+/* ---------- Saved CV ---------- */
+const DEFAULT_CV = `FATHIMA ISHA NAWAZ — Information Systems & Business Analytics graduate
+
+PROFESSIONAL SUMMARY
+Information Systems and Business Analytics graduate from the American University of Sharjah with experience at Emirates Group, Apparel Group and GITCO. Skilled in Python, Excel (Power Query, Pivot Tables), Power BI and Tableau, with experience analysing large datasets, building KPI dashboards and presenting clear insights to stakeholders. Built AI-driven tools at Emirates that cut analysis turnaround from 7 days to 3 minutes.
+
+CORE COMPETENCIES
+Data Analysis & Visualisation · SQL · KPI Dashboards & Reporting · Data Cleansing & Quality · Requirements Gathering · Process Improvement · Stakeholder Management · Forecasting · AI & Automation
+
+EDUCATION
+BSc Business Administration – Information Systems and Business Analytics, American University of Sharjah (Jan 2022 – Dec 2025). CGPA 3.36 · Dean's List · Merit Scholarship
+
+DATA SCIENCE & AI INTERN | Emirates Group, Dubai (Jan 2026 – Jul 2026)
+• Built two end-to-end agentic AI systems in Dataiku: an OAG Competitive Intelligence Agent (processing 595K+ rows to detect route entrants, capacity surges and market share shifts across EK's network) and a Route Review Agent (ingesting Power, MIDT, CBI and fares data), generating LLM-driven narrative analysis and branded PowerPoint reports that reduced analyst turnaround from 7 days to 3 minutes.
+• Cleansed and analysed Emirates ticketing data using Python (Pandas, NumPy) and Excel Pivot Tables across booking channels (EOL, Online, Trade), coupon usage and flight distance segments to understand customer booking behaviour and surface actionable revenue insights.
+• Led a cross-functional ideation session with the Data Science and Route Planning teams, translating four business pain points (manual analytics, data silos, reactive monitoring, data trust) into a structured AI agent roadmap.
+• Resolved a critical ServiceNow workflow bottleneck while onboarding 120+ cost centres onto Sally, an internal AI platform, collaborating with IT to consolidate multiple requests into one streamlined flow.
+
+E-COMMERCE INTERN | Apparel Group (Jun 2025 – Aug 2025)
+• Performed segmentation of SKU-level sales data using Excel Pivot Tables to identify top-performing products, driving targeted pricing and inventory decisions.
+• Managed product listings and pricing strategy on Trendyol; designed marketing assets that increased social media engagement by 25%.
+
+MARKETING EXECUTIVE | GITCO, Saudi Arabia (Jun 2024 – Jul 2024)
+• Analysed product performance and customer preference data in Excel, improving targeted campaign effectiveness by 15%.
+• Prepared financial reports and managed inter-division fund transfers for procurement operations.
+
+RESEARCH ANALYST | Mental Health AE (Dec 2023 – Jan 2024)
+• Benchmarked global youth mental health programmes to identify best practices and gaps for the organisation's strategy.
+
+TECHNICAL PROJECTS
+• Sustainability Database Redesign (MySQL): Designed a normalised 13-entity database with triggers, stored procedures and 10+ SQL queries to maintain data integrity and support budget and project reporting.
+• Swiggy Performance Analysis (Excel, Power BI, Tableau): Analysed a 300,000+ row, 4-table dataset with Power Query and Excel Pivot Tables; applied descriptive, diagnostic, predictive (seasonality forecast) and prescriptive analysis, including Goal Seek planning toward an INR 100M revenue target.
+• Aviation Performance Dashboards (Power BI): Built two interactive dashboards using DAX (CALCULATE, time intelligence, RANKX, YoY variance) to track operational performance and route trends.
+
+TECHNICAL SKILLS
+Microsoft Office: Excel (Pivot Tables, Power Query, formulas), PowerPoint, Word
+Data & BI: SQL / MySQL · Power BI · Tableau · Data Cleansing
+Statistics & Analytics: Descriptive and diagnostic analysis · Forecasting · Scikit-learn · R Studio
+Programming & AI: Python (Pandas, NumPy, Matplotlib, Seaborn) · Dataiku · LangGraph · LLM APIs · RAG · Jupyter Notebook · Microsoft Foundry
+Languages: English (Fluent) · Malayalam (Fluent) · Hindi
+
+LEADERSHIP & EXTRACURRICULAR
+• Business Analytics Association, AUS: Treasurer (Aug – Dec 2025), PR Manager (Jan – May 2025)
+• Startup SBA, AUS: Executive Assistant (Oct 2024 – May 2025), Executive Director (Aug 2023 – May 2024)
+• Entrepreneurship Club (Operations Team, Jan – May 2025) and AUS Model United Nations (Logistics Coordinator, Aug 2023 – Feb 2024)`;
+const DEFAULT_NAME = "Fathima Isha Nawaz";
+const DEFAULT_CONTACT = "linkedin.com/in/isha-nawaz";
+
+/* ---------- Example posting with a saved analysis ---------- */
+const EXAMPLE_TITLE = "Emirates – Junior Data Analyst (SkyCargo)";
+const EXAMPLE_JD = `In this role, you will:
+
+Assist in the collection of data dictionaries and creation of business glossaries. Maintain core data repositories and analytics inventory documentation as data sources and interfaces change over time ensuring these are up to date as per requirements.
+Support the Manager with administrative/support tasks, related to the delivery of Data Analytics and reporting including adhoc data analysis autonomously across assigned areas of responsibility.
+Conduct data profiling to analyze quality of incoming data and advise on any data cleansing rules, or issue resolution options in case of incidents (including analysis of potential data quality issues). Incorporate business transformation rules into solution designs or mapping documents to ensure solutions provide timely business value.
+Conduct rudimentary data gap analysis to understand availability of required data, by comparing to existing core data repositories.
+Document proposed or modified data interfaces, including fit for data models, data flow timing, source-to-target mapping, uniqueness criteria and data transformation rules including data validations and controls.
+Review technical solutions to ensure they effectively meet the analytical requirements and expectations.
+Assist with source system identification and data profiling activities during the discovery phase of new initiatives.
+Keep current on evolving data and analytics business knowledge domains to accurately assess the quality of the data and ensure business glossaries remain up-to-date, and drive quality and consistency across data and analytic solutions.
+Proactively work with senior and lead data analysts, chapter leads and line managers to upskill on the data analysis technology set used by Data Engineering.
+Support user data and analytics training sessions with preparation of training material in line with requirements of the manager.
+
+Qualification
+12 years schooling or equivalent. Consideration will be given to those with 12+3 years in a relevant field such as Computer Science, Computational Mathematics, Computer Engineering or Software Engineering. Specialization or electives in a Data & Analytics field (e.g. Data Warehousing, Data Science, Business Intelligence) a nice-to-have.
+4+ yrs experience in Data Analysis (fewer years' experience will be considered for Masters degree holders).
+Minimum 1+ years conducting data analysis tasks (e.g. source system identification, data dictionary / metadata collection, data profiling, source-to-target mapping).
+Understanding of business transformation rules and data solution designs.
+Exposure to moderate complexity SQL queries to analyze data and provide results to business users or project team members.
+Experience with building information designs for data-centric projects on one or more of the following (preferably within an airlines industry): Data Warehouses, Big Data Environment for Analytics, Data API, Business Intelligence Solutions.
+Exposure to data governance or business intelligence tools (e.g. Collibra, Snowflake, Microstrategy, Power BI, Tableau) a nice-to-have.
+Advanced proficiency with Microsoft Office suite (Excel, PowerPoint).
+Airline/Travel industry experience a nice-to-have.`;
+
+const EXAMPLE_AI = {
+  score: 62,
+  verdict: "Strong on tools, SQL and airline context, and you already know Emirates' data sources. The gaps are the formal data-management vocabulary (profiling, dictionaries, mapping) and the 4+ years they ask for. Worth applying, with a CV that speaks their language.",
+  requirements: [
+    {req:"SQL for analysing data", status:"strong", evidence:"MySQL database redesign with triggers, stored procedures and 10+ queries."},
+    {req:"Airline industry, BI solutions", status:"strong", evidence:"Six months in Emirates' Data Science team; Power BI aviation dashboards with DAX."},
+    {req:"Advanced Excel and PowerPoint", status:"strong", evidence:"Pivot Tables and Power Query across three roles; automated branded PowerPoint reports at Emirates."},
+    {req:"Data gap analysis", status:"strong", evidence:"Ran a session turning four pain points, including data silos and data trust, into a roadmap."},
+    {req:"Data profiling and data quality", status:"partial", evidence:"Cleansed Emirates ticketing data in Python. 'Profiling' itself isn't named on your CV."},
+    {req:"Source system identification, transformation rules", status:"partial", evidence:"Route Review Agent pulled Power, MIDT, CBI and fares data together in Dataiku. Frame it as integrating source systems."},
+    {req:"Data models and documentation", status:"partial", evidence:"Normalised 13-entity MySQL model. No mention of data dictionaries or mapping documents."},
+    {req:"Training material for users", status:"partial", evidence:"Onboarded 120+ cost centres onto Sally. Mention any guides or sessions you prepared, if you did."},
+    {req:"Data dictionaries, business glossaries, metadata", status:"gap", evidence:"Not on your CV. If you documented fields for the agents or the MySQL project, say so."},
+    {req:"Governance tools (Collibra, Snowflake, Microstrategy)", status:"gap", evidence:"Nice-to-have only. Power BI and Tableau already cover their BI tool list."},
+    {req:"4+ years in data analysis", status:"gap", evidence:"You have about a year of internships. This is the biggest risk; your Emirates experience is the counterweight."}
+  ],
+  bullets: [
+    {original:"Built two end-to-end agentic AI systems in Dataiku: an OAG Competitive Intelligence Agent (...) and a Route Review Agent (ingesting Power, MIDT, CBI and fares data)...",
+     rewrite:"Integrated four Emirates source systems (Power, MIDT, CBI, fares) and 595K+ rows of OAG schedule data into Dataiku pipelines, defining the transformation logic behind two AI agents that cut route-review turnaround from 7 days to 3 minutes.",
+     why:"Leads with source systems and transformation rules, the core of this job."},
+    {original:"Cleansed and analysed Emirates ticketing data using Python (Pandas, NumPy) and Excel Pivot Tables across booking channels...",
+     rewrite:"Profiled and cleansed Emirates ticketing data in Python (Pandas, NumPy), resolving data quality issues across booking channels (EOL, Online, Trade), coupon usage and distance segments before analysing customer booking behaviour.",
+     why:"Uses their words 'profiled' and 'data quality'. Keep 'profiled' only if you checked nulls, duplicates or distributions, which cleansing usually involves."},
+    {original:"Led a cross-functional ideation session with the Data Science and Route Planning teams...",
+     rewrite:"Ran a gap analysis with the Data Science and Route Planning teams, turning four pain points (manual analytics, data silos, reactive monitoring, data trust) into a structured AI agent roadmap.",
+     why:"Matches 'data gap analysis' and shows you work with senior analysts and leads."},
+    {original:"Sustainability Database Redesign (MySQL): Designed a normalised 13-entity database with triggers, stored procedures...",
+     rewrite:"Designed a normalised 13-entity MySQL data model with triggers, stored procedures and validation controls, plus 10+ SQL queries supporting budget and project reporting.",
+     why:"Hits 'data models', 'validations and controls' and SQL in one line."},
+    {original:"Resolved a critical ServiceNow workflow bottleneck while onboarding 120+ cost centres onto Sally...",
+     rewrite:"Onboarded 120+ cost centres onto Sally, Emirates' internal AI platform, working with IT to consolidate multiple requests into one streamlined ServiceNow flow.",
+     why:"Shows you can support users and work with technical teams. Add a training detail if you ran any."}
+  ],
+  summary: "Information Systems and Business Analytics graduate with six months in Emirates Group's Data Science team, integrating airline source systems (MIDT, CBI, fares) into automated pipelines and cleansing large ticketing datasets in Python. Skilled in SQL, Excel, Power BI and Tableau, with a focus on data quality and turning business requirements into reliable data solutions.",
+  add_keywords: ["data profiling","data quality","source systems","transformation rules","data model","gap analysis","validation","SkyCargo / airline data"],
+  watch_outs: [
+    "They ask for 4+ years. Don't stretch your dates; let the Emirates work carry the application, and mention in your cover letter that you've already worked with Emirates data and teams.",
+    "Only use 'data dictionary' or 'source-to-target mapping' if you actually produced one. Interviewers will ask you to describe it.",
+    "Your CV doesn't mention cargo. One line in the cover letter on why SkyCargo interests you would help."
+  ],
+  angle: "You're not starting cold: you've already worked inside Emirates with MIDT, CBI and fares data and with the Route Planning team, so you'll ramp up on SkyCargo's data landscape faster than an outside junior."
+};
+
+const EXAMPLE_CV = {
+  headline: "Junior Data Analyst",
+  summary: EXAMPLE_AI.summary,
+  competencies: ["Data Cleansing & Quality","SQL / MySQL","Source System Integration","Data Modelling","Gap Analysis & Requirements Gathering","Power BI & Tableau","Advanced Excel & PowerPoint","Stakeholder Management","Airline Data (MIDT, CBI, OAG)"],
+  education: [{degree:"BSc Business Administration – Information Systems and Business Analytics", school:"American University of Sharjah (AUS), UAE", dates:"Jan 2022 – Dec 2025", details:"CGPA 3.36 / 4.00 · Dean's List · Merit Scholarship"}],
+  experience: [
+    {role:"Data Science & AI Intern", org:"Emirates Group", location:"Dubai, UAE", dates:"Jan 2026 – Jul 2026", bullets:[
+      EXAMPLE_AI.bullets[0].rewrite,
+      EXAMPLE_AI.bullets[1].rewrite,
+      EXAMPLE_AI.bullets[2].rewrite,
+      EXAMPLE_AI.bullets[4].rewrite
+    ]},
+    {role:"E-Commerce Intern", org:"Apparel Group", location:"UAE", dates:"Jun 2025 – Aug 2025", bullets:[
+      "Segmented SKU-level sales data with Excel Pivot Tables to identify top-performing products, informing pricing and inventory decisions.",
+      "Managed product listings and pricing on Trendyol; designed marketing assets that increased social media engagement by 25%."
+    ]},
+    {role:"Marketing Executive", org:"GITCO", location:"Saudi Arabia", dates:"Jun 2024 – Jul 2024", bullets:[
+      "Analysed product performance and customer preference data in Excel, improving targeted campaign effectiveness by 15%.",
+      "Prepared financial reports and managed inter-division fund transfers for procurement operations."
+    ]},
+    {role:"Research Analyst", org:"Mental Health AE", location:"UAE", dates:"Dec 2023 – Jan 2024", bullets:[
+      "Benchmarked global youth mental health programmes to identify best practices and gaps for the organisation's strategy."
+    ]}
+  ],
+  projects: [
+    {name:"Sustainability Database Redesign", tools:"MySQL", text:"Designed a normalised 13-entity data model with triggers, stored procedures and validation controls, plus 10+ SQL queries supporting budget and project reporting."},
+    {name:"Aviation Performance Dashboards", tools:"Power BI", text:"Built two interactive dashboards using DAX (CALCULATE, time intelligence, RANKX, YoY variance) to track operational performance and route trends."},
+    {name:"Swiggy Performance Analysis", tools:"Excel, Power BI, Tableau", text:"Cleaned and modelled a 300,000+ row, 4-table dataset with Power Query; applied descriptive, diagnostic, predictive (seasonality forecast) and prescriptive analysis toward an INR 100M revenue target."}
+  ],
+  skills: [
+    {group:"Data & BI", items:["SQL / MySQL","Power BI (DAX)","Tableau","Data Cleansing"]},
+    {group:"Microsoft Office", items:["Excel (Pivot Tables, Power Query, formulas)","PowerPoint","Word"]},
+    {group:"Programming & AI", items:["Python (Pandas, NumPy, Matplotlib, Seaborn)","Dataiku","LangGraph","LLM APIs","RAG","Jupyter Notebook","Microsoft Foundry"]},
+    {group:"Statistics & Analytics", items:["Descriptive and diagnostic analysis","Forecasting","Scikit-learn","R Studio"]}
+  ],
+  languages: "English (Fluent) · Malayalam (Fluent) · Hindi",
+  leadership: [
+    "Business Analytics Association, AUS: Treasurer (Aug – Dec 2025), PR Manager (Jan – May 2025)",
+    "Startup SBA, AUS: Executive Assistant (Oct 2024 – May 2025), Executive Director (Aug 2023 – May 2024)",
+    "Entrepreneurship Club (Operations Team, Jan – May 2025) and AUS Model United Nations (Logistics Coordinator, Aug 2023 – Feb 2024)"
+  ],
+  section_order: ["summary","competencies","experience","projects","education","skills","leadership"],
+  changes: [
+    "Added a 'Junior Data Analyst' headline to match the role",
+    "Rewrote the summary around source systems and data quality",
+    "Moved Work Experience above Education, since Emirates is your strongest match",
+    "Led the Emirates role with the source-system integration bullet and recast the ideation session as gap analysis",
+    "Put the MySQL data-model project first and named its validation controls",
+    "Reordered competencies to mirror the posting"
+  ]
+};
+
+/* ---------- Skills dictionary ---------- */
+const SKILLS = [
+  ["SQL", /\bsql\b|\bmysql\b|\bquer(y|ies)\b/gi],
+  ["Python", /\bpython\b|\bpandas\b|\bnumpy\b/gi],
+  ["Excel", /\bexcel\b|pivot tables?|power query/gi],
+  ["PowerPoint", /\bpowerpoint\b/gi],
+  ["Microsoft Office", /microsoft office|ms office/gi],
+  ["Power BI", /power ?bi\b|\bdax\b/gi],
+  ["Tableau", /\btableau\b/gi],
+  ["Dashboards", /\bdashboards?\b/gi],
+  ["Reporting", /\breporting\b/gi],
+  ["Data cleansing", /\bcleans(e|ed|ing)\b|data cleaning/gi],
+  ["Data quality", /data quality|quality of (the )?(incoming )?data|data integrity|data trust/gi],
+  ["Data profiling", /\bprofil(e|ed|ing)\b/gi],
+  ["Data dictionary / metadata", /data dictionar(y|ies)|\bmetadata\b/gi],
+  ["Business glossary", /\bglossar(y|ies)\b/gi],
+  ["Source-to-target mapping", /source[- ]to[- ]target|mapping documents?/gi],
+  ["Source systems", /source systems?|data sources?|\bingest(ing|ion)?\b/gi],
+  ["Data modelling", /data models?|data modell?ing|\bnormali[sz]ed\b/gi],
+  ["Transformation rules / ETL", /transformation rules?|\betl\b|data pipelines?|data transformation/gi],
+  ["Validation & controls", /validations?|\bcontrols\b|\btriggers\b/gi],
+  ["Data warehousing", /warehous(e|es|ing)/gi],
+  ["Big data", /big data/gi],
+  ["Data API", /\bdata api\b|\bapis?\b/gi],
+  ["Data governance", /governance|\bcollibra\b/gi],
+  ["Snowflake", /\bsnowflake\b/gi],
+  ["MicroStrategy", /microstrategy/gi],
+  ["Business intelligence", /business intelligence|\bbi\b(?! ?tools)/gi],
+  ["Gap analysis", /gap analysis|\bgaps\b|pain points/gi],
+  ["Requirements", /\brequirements\b/gi],
+  ["Stakeholder work", /stakeholders?|business users|cross-functional|line managers|chapter leads/gi],
+  ["Documentation", /\bdocumentation\b|\bdocument (proposed|modified)\b/gi],
+  ["Training & enablement", /training (sessions?|material)|\bonboard(ing|ed)?\b/gi],
+  ["Forecasting", /\bforecast(ing)?\b|predictive/gi],
+  ["Statistics", /\bstatistic(s|al)\b|descriptive|diagnostic/gi],
+  ["Machine learning", /machine learning|scikit|\bml\b/gi],
+  ["AI / LLMs", /\bai\b|\bllms?\b|agentic|\brag\b|generative/gi],
+  ["Automation", /\bautomat(e|ed|ion|ing)\b/gi],
+  ["Process improvement", /process improvement|streamlin(e|ed)/gi],
+  ["Data science", /data science/gi],
+  ["Airline / travel", /\bairlines?\b|aviation|\btravel\b|\bflights?\b|\broutes?\b|skycargo|\bemirates\b/gi],
+  ["Computer science degree", /computer science|software engineering|computer engineering|information systems/gi],
+  ["R", /\br studio\b|\brstudio\b|\bin r\b/gi],
+];
+
+/* ---------- helpers ---------- */
+const $ = id => document.getElementById(id);
+const store = {
+  get(k, d){ try{ const v = localStorage.getItem(k); return v==null? d : JSON.parse(v); }catch{ return d; } },
+  set(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch{} }
+};
+function setGauge(id,v){ const g=$(id+"Gauge"); if(!g) return; v=Math.max(0,Math.min(100,Number(v)||0)); g.style.setProperty("--p",v); g.dataset.level = v===0 ? "" : v>=70 ? "high" : v>=45 ? "mid" : "low"; }
+function el(tag, cls, text){ const e=document.createElement(tag); if(cls) e.className=cls; if(text!=null) e.textContent=text; return e; }
+function hits(re, text){ re.lastIndex=0; return re.test(text); }
+async function copyText(t, btn){
+  try{ await navigator.clipboard.writeText(t); if(btn){ const o=btn.textContent; btn.textContent="Copied"; setTimeout(()=>btn.textContent=o,1400);} }
+  catch{ const ta=el("textarea"); ta.value=t; document.body.append(ta); ta.select(); try{document.execCommand("copy");}catch{} ta.remove(); if(btn){btn.textContent="Copied";} }
+}
+function cvBullets(cv){
+  return cv.split("\n").map(l=>l.trim()).filter(l=>/^[•\-*]\s+/.test(l)).map(l=>l.replace(/^[•\-*]\s+/,""));
+}
+
+/* ---------- state ---------- */
+let ai = null;          // current AI result
+let aiForJd = null;     // jd text the AI result belongs to
+
+/* ---------- keyword analysis ---------- */
+function analyse(){
+  const jd = $("jd").value, cv = $("cv").value;
+  const asked = SKILLS.filter(([,re]) => hits(re, jd));
+  const have = asked.filter(([,re]) => hits(re, cv));
+  const miss = asked.filter(s => !have.includes(s));
+
+  const pct = asked.length ? Math.round(have.length/asked.length*100) : null;
+  $("kwNum").innerHTML = pct==null ? "–" : `${pct}<small>%</small>`;
+  setGauge("kw", pct||0);
+  $("kwNote").textContent = asked.length ? `${have.length} of ${asked.length} skills in the posting appear in your CV` : "Paste a posting to start";
+
+  const fill = (box, list, cls) => { box.replaceChildren(...(list.length? list.map(([n])=>el("span","chip "+cls,n)) : [el("span","hint","None")])); };
+  fill($("have"), have, "ok"); fill($("miss"), miss, "no");
+
+  renderPosting(jd, have, miss);
+  if(!(ai && aiForJd===jd)) renderKeywordBullets(cv, asked);
+  return {pct, asked};
+}
+
+function renderPosting(jd, have, miss){
+  const box = $("posting");
+  if(!jd.trim()){ box.replaceChildren(el("span","hint","Your highlighted posting will appear here.")); return; }
+  const spans=[];
+  for(const [list,cls] of [[have,"m"],[miss,"x"]]){
+    for(const [,re] of list){ re.lastIndex=0; let m; while((m=re.exec(jd))){ if(!m[0]) { re.lastIndex++; continue; } spans.push([m.index, m.index+m[0].length, cls]); } }
+  }
+  spans.sort((a,b)=>a[0]-b[0]||b[1]-a[1]);
+  const out=[]; let pos=0;
+  for(const [s,e,c] of spans){ if(s<pos) continue; if(s>pos) out.push(document.createTextNode(jd.slice(pos,s))); out.push(el("mark",c,jd.slice(s,e))); pos=e; }
+  if(pos<jd.length) out.push(document.createTextNode(jd.slice(pos)));
+  box.replaceChildren(...out);
+}
+
+function renderKeywordBullets(cv, asked){
+  $("bulletSrc").textContent = "Ranked by keyword overlap";
+  const box=$("bullets");
+  const ranked = cvBullets(cv).map(b=>({b, tags: asked.filter(([,re])=>hits(re,b)).map(([n])=>n)}))
+    .filter(x=>x.tags.length).sort((a,b)=>b.tags.length-a.tags.length).slice(0,5);
+  if(!ranked.length){ box.replaceChildren(el("p","hint","Paste a posting to see which of your bullets fit it best.")); return; }
+  box.replaceChildren(...ranked.map(({b,tags})=>{
+    const c=el("div","bl"); const h=el("div","head"); h.append(el("span","rank"));
+    const t=el("div","tags"); tags.forEach(x=>t.append(el("span",null,x)));
+    c.append(h, el("div","new",b), t); return c;
+  }));
+  const note=el("p","hint","Get AI suggestions to see these rewritten in the employer's language.");
+  box.append(note);
+}
+
+/* ---------- AI results ---------- */
+function renderAI(r, sourceLabel){
+  const s = Math.max(0, Math.min(100, Number(r.score)||0));
+  $("aiNum").innerHTML = `${s}<small>/100</small>`;
+  setGauge("ai", s);
+  $("aiNote").textContent = sourceLabel;
+  $("verdict").textContent = r.verdict || "";
+
+  const order={strong:0,partial:1,gap:2};
+  const reqs=[...(r.requirements||[])].sort((a,b)=>(order[a.status]??3)-(order[b.status]??3));
+  $("reqs").replaceChildren(...reqs.map(q=>{
+    const row=el("div","req"); const st=String(q.status||"partial").toLowerCase();
+    row.append(el("span","status "+(order[st]!=null?st:"partial"), st==="gap"?"Gap":st==="strong"?"Strong":"Partial"));
+    const t=el("div"); t.append(el("div","what",q.req||""), el("div","ev",q.evidence||"")); row.append(t); return row;
+  }));
+  $("reqSrc").textContent = `${reqs.filter(q=>q.status==="strong").length} strong · ${reqs.filter(q=>q.status==="partial").length} partial · ${reqs.filter(q=>q.status==="gap").length} gaps`;
+  $("reqPanel").hidden=false;
+
+  $("bulletSrc").textContent = "Rewritten for this posting";
+  $("bullets").replaceChildren(...(r.bullets||[]).map(b=>{
+    const c=el("div","bl"); const h=el("div","head"); h.append(el("span","rank"));
+    const cp=el("button","small","Copy"); cp.onclick=()=>copyText(b.rewrite||"",cp); h.append(cp);
+    c.append(h, el("div","new",b.rewrite||""), el("div","orig",b.original||""), el("div","why",b.why||""));
+    return c;
+  }));
+
+  $("summary").textContent = r.summary||"";
+  $("angle").textContent = r.angle||"";
+  $("watch").replaceChildren(...(r.watch_outs||[]).map(w=>el("li",null,w)));
+  $("extras").hidden=false;
+
+  const kw=r.add_keywords||[];
+  $("addKw").replaceChildren(...kw.map(k=>el("span","chip neutral",k)));
+  $("addKwWrap").hidden=!kw.length;
+}
+
+function clearAI(){
+  ai=null; aiForJd=null;
+  $("aiNum").textContent="–"; setGauge("ai",0);
+  $("aiNote").textContent="Reads meaning, not just words";
+  $("verdict").textContent="Run AI suggestions for a plain-English verdict.";
+  $("reqPanel").hidden=true; $("extras").hidden=true; $("addKwWrap").hidden=true;
+}
+
+/* AI-BRIDGE START: calls this site's /api/analyze, which keeps the API key on the server */
+let blocked=false;
+const aiReady = () => true;
+async function askClaude(kind, p, signal){
+  const res = await fetch("/api/analyze", {method:"POST", headers:{"content-type":"application/json"},
+    body: JSON.stringify({kind, cv:p.cv, jd:p.jd, title:p.title, code:store.get("cvfit.code","")}), signal});
+  const raw = await res.text();
+  let data = {}; try{ data = JSON.parse(raw); }catch{}
+  if(!res.ok) throw {code: data.code || (res.status===504 ? "timeout" : "upstream_error"), detail: data.detail || (data.code ? "" : `HTTP ${res.status}`)};
+  return data.result;
+}
+async function saveFile(name, blob){
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement("a"); a.href = url; a.download = name;
+  document.body.append(a); a.click(); a.remove();
+  setTimeout(()=>URL.revokeObjectURL(url), 2000);
+}
+let codeFor="analysis";
+function showCodeRow(kind){
+  codeFor=kind;
+  const st = kind==="cv" ? $("cvStatus") : $("aiStatus");
+  st.after($("codeRow"));            // put the box right under the message that asked for it
+  $("codeRow").hidden=false; $("accessCode").focus();
+}
+function saveCode(){
+  const v=$("accessCode").value.trim(); if(!v) return;
+  store.set("cvfit.code",v); $("codeRow").hidden=true;
+  run(codeFor);                      // retry straight away
+}
+$("codeSave").onclick=saveCode;
+$("accessCode").addEventListener("keydown",e=>{ if(e.key==="Enter") saveCode(); });
+setTimeout(()=>setBusy(false));
+/* AI-BRIDGE END */
+
+const ERR = {
+  not_granted:"Claude wasn't allowed for this page. The keyword check still works.",
+  sampling_disabled:"Claude isn't available on this account.",
+  rate_limited:"Too many requests just now. Try again in a minute.",
+  session_expired:"Please sign in to Claude again, then retry.",
+  invalid_json:"The answer came back in an unexpected format. Try again.",
+  refused:"Claude couldn't answer this one. Try trimming the posting.",
+  prompt_too_large:"The posting or CV is too long. Trim it and try again.",
+  bad_code:"Enter your access code below. It's the ACCESS_CODE you set in Vercel.",
+  cut_off:"The answer was too long and got cut off. Try again, or trim the job posting.",
+  timeout:"The server took too long to answer. Try again.",
+  not_configured:"AI isn't set up on this site yet. Add ANTHROPIC_API_KEY in Vercel.",
+  unavailable:"AI features work when this page is opened in Claude.",
+};
+
+let ctl=null, busy=false;
+function setBusy(b){
+  const off = b || blocked || !aiReady();
+  $("aiBtn").disabled=off; $("cvBtn").disabled=off;
+  $("stopBtn").hidden=!b; $("cvStop").hidden=!b;
+}
+async function run(kind){
+  const st = kind==="cv" ? $("cvStatus") : $("aiStatus");
+  const jd=$("jd").value.trim(), cv=$("cv").value.trim();
+  if(!jd){ st.textContent="Paste a job posting first."; return; }
+  if(busy) return;
+  busy=true; ctl=new AbortController(); setBusy(true);
+  st.className="status-line";
+  st.textContent = kind==="cv" ? "Writing your tailored CV… this can take up to a minute." : "Reading the posting and your CV… this usually takes 20–60 seconds.";
+  const jdNow=$("jd").value;
+  try{
+    const r = await askClaude(kind, {cv, jd, title:$("jobTitle").value.trim()}, ctl.signal);
+    if(kind==="cv"){
+      if(!r || !Array.isArray(r.experience)) throw {code:"invalid_json"};
+      tailored=r; tailoredForJd=jdNow; renderCV(r, "Tailored by Claude, just now");
+      st.textContent="Done. Download it for Word or copy the text.";
+    }else{
+      if(!r || !Array.isArray(r.requirements)) throw {code:"invalid_json"};
+      ai=r; aiForJd=jdNow; renderAI(r, "From Claude, just now");
+      st.textContent="Done. Save it to history to keep it.";
+    }
+  }catch(e){
+    if(e?.code==="cancelled" || e?.name==="AbortError"){ st.textContent="Stopped."; }
+    else{
+      st.className="status-line err"; st.textContent = (ERR[e?.code] || "Something went wrong reaching Claude. Try again.") + (e?.detail ? ` (Details: ${e.detail})` : "");
+      if(e?.code==="bad_code" && typeof showCodeRow==="function") showCodeRow(kind);
+    }
+  }finally{ busy=false; setBusy(false); }
+}
+$("aiBtn").onclick=()=>run("analysis");
+$("cvBtn").onclick=()=>run("cv");
+$("stopBtn").onclick=()=>ctl?.abort();
+$("cvStop").onclick=()=>ctl?.abort();
+
+/* ---------- Tailored CV ---------- */
+let tailored=null, tailoredForJd=null;
+const TITLES={summary:"Professional Summary",competencies:"Core Competencies",education:"Education",experience:"Work Experience",projects:"Technical Projects",skills:"Technical Skills",leadership:"Leadership & Extracurricular"};
+const asText = v => v==null ? "" : String(v);
+function cvBlocks(c){
+  const order=(Array.isArray(c.section_order)?c.section_order:[]).filter(k=>TITLES[k]);
+  for(const k of ["summary","competencies","education","experience","projects","skills","leadership"]) if(!order.includes(k)) order.push(k);
+  const out=[];
+  for(const k of order){
+    const items=[];
+    if(k==="summary" && c.summary) items.push({t:"para",text:asText(c.summary)});
+    if(k==="competencies" && c.competencies?.length) items.push({t:"para",text:c.competencies.map(asText).join(" · ")});
+    if(k==="education") (c.education||[]).forEach(e=>{ items.push({t:"role",left:asText(e.degree),sub:"",right:asText(e.dates)}); items.push({t:"para",text:[e.school,e.details].filter(Boolean).join(" · ")}); });
+    if(k==="experience") (c.experience||[]).forEach(x=>{ items.push({t:"role",left:asText(x.role),sub:[x.org,x.location].filter(Boolean).join(", "),right:asText(x.dates)}); (x.bullets||[]).forEach(b=>items.push({t:"bullet",text:asText(b)})); });
+    if(k==="projects") (c.projects||[]).forEach(p=>items.push({t:"bullet",lead:asText(p.name)+(p.tools?` (${p.tools})`:"")+": ",text:asText(p.text)}));
+    if(k==="skills"){ (c.skills||[]).forEach(s=>items.push({t:"kv",k:asText(s.group),v:Array.isArray(s.items)?s.items.join(" · "):asText(s.items)})); if(c.languages) items.push({t:"kv",k:"Languages",v:asText(c.languages)}); }
+    if(k==="leadership") (c.leadership||[]).forEach(l=>items.push({t:"bullet",text:asText(l)}));
+    if(items.length) out.push({title:TITLES[k],items});
+  }
+  return out;
+}
+function renderCV(c, label){
+  $("cvSrc").textContent=label;
+  const d=$("cvdoc"); d.replaceChildren();
+  d.append(el("div","cv-name",$("cvName").value.trim()||"Your Name"));
+  if(c.headline) d.append(el("div","cv-headline",asText(c.headline)));
+  const contact=$("cvContact").value.trim(); if(contact) d.append(el("div","cv-contact",contact));
+  for(const sec of cvBlocks(c)){
+    d.append(el("div","cv-h",sec.title));
+    let ul=null;
+    for(const it of sec.items){
+      if(it.t==="bullet"){
+        if(!ul){ ul=el("ul"); d.append(ul); }
+        const li=el("li"); if(it.lead) li.append(el("b",null,it.lead)); li.append(document.createTextNode(it.text)); ul.append(li); continue;
+      }
+      ul=null;
+      if(it.t==="para") d.append(el("p",null,it.text));
+      if(it.t==="role"){ const r=el("div","cv-role"); const l=el("span"); l.append(el("b",null,it.left)); if(it.sub) l.append(document.createTextNode(" | "+it.sub)); r.append(l, el("span","d",it.right)); d.append(r); }
+      if(it.t==="kv"){ const p=el("p"); p.append(el("b",null,it.k+": "), document.createTextNode(it.v)); d.append(p); }
+    }
+  }
+  const ch=Array.isArray(c.changes)?c.changes:[];
+  $("cvChanges").replaceChildren(...ch.map(x=>el("li",null,asText(x))));
+  $("cvChangesWrap").hidden=!ch.length;
+  $("dlBtn").disabled=false; $("copyCv").disabled=false;
+}
+function clearCV(){
+  tailored=null; tailoredForJd=null;
+  $("cvSrc").textContent="A full CV rewritten for this posting, using only facts from yours.";
+  $("cvdoc").replaceChildren(el("p","hint","Tap Build tailored CV to get your whole CV rewritten for this posting, ready to download for Word."));
+  $("cvChangesWrap").hidden=true; $("dlBtn").disabled=true; $("copyCv").disabled=true;
+}
+function cvToText(c){
+  const lines=[($("cvName").value.trim()||"Your Name").toUpperCase()];
+  if(c.headline) lines.push(asText(c.headline));
+  const contact=$("cvContact").value.trim(); if(contact) lines.push(contact);
+  for(const sec of cvBlocks(c)){
+    lines.push("", sec.title.toUpperCase());
+    for(const it of sec.items){
+      if(it.t==="para") lines.push(it.text);
+      if(it.t==="bullet") lines.push("• "+(it.lead||"")+it.text);
+      if(it.t==="role") lines.push(it.left+(it.sub?" | "+it.sub:"")+(it.right?"   "+it.right:""));
+      if(it.t==="kv") lines.push(it.k+": "+it.v);
+    }
+  }
+  return lines.join("\n");
+}
+async function makeDocx(c){
+  const D=window.docx; if(!D) throw {code:"no_lib"};
+  const {Document,Packer,Paragraph,TextRun,TabStopType,BorderStyle,AlignmentType}=D;
+  const F="Calibri", ACC="1D5F74", M=680, RIGHT=11906-M*2;
+  const run=(text,o={})=>new TextRun({text,font:F,size:19,...o});
+  const P=[];
+  P.push(new Paragraph({alignment:AlignmentType.CENTER,children:[run(($("cvName").value.trim()||"Your Name").toUpperCase(),{bold:true,size:32})]}));
+  if(c.headline) P.push(new Paragraph({alignment:AlignmentType.CENTER,children:[run(asText(c.headline),{bold:true,color:ACC,size:22})]}));
+  const contact=$("cvContact").value.trim();
+  if(contact) P.push(new Paragraph({alignment:AlignmentType.CENTER,spacing:{after:80},children:[run(contact,{size:18,color:"555555"})]}));
+  for(const sec of cvBlocks(c)){
+    P.push(new Paragraph({spacing:{before:140,after:60},border:{bottom:{style:BorderStyle.SINGLE,size:6,color:"333333",space:1}},children:[run(sec.title.toUpperCase(),{bold:true,color:ACC,size:21})]}));
+    for(const it of sec.items){
+      if(it.t==="para") P.push(new Paragraph({spacing:{after:30},children:[run(it.text)]}));
+      if(it.t==="bullet") P.push(new Paragraph({bullet:{level:0},spacing:{after:10},indent:{left:300,hanging:200},children:[...(it.lead?[run(it.lead,{bold:true})]:[]),run(it.text)]}));
+      if(it.t==="role") P.push(new Paragraph({spacing:{before:70,after:20},tabStops:[{type:TabStopType.RIGHT,position:RIGHT}],children:[run(it.left,{bold:true}),...(it.sub?[run(" | "+it.sub)]:[]),...(it.right?[run("\t"+it.right,{color:"555555"})]:[])]}));
+      if(it.t==="kv") P.push(new Paragraph({spacing:{after:10},children:[run(it.k+": ",{bold:true}),run(it.v)]}));
+    }
+  }
+  const doc=new Document({
+    creator:$("cvName").value.trim()||"CV Fit", title:"CV",
+    styles:{default:{document:{run:{font:F,size:19},paragraph:{spacing:{line:250}}}}},
+    sections:[{properties:{page:{size:{width:11906,height:16838},margin:{top:620,bottom:560,left:M,right:M}}},children:P}]
+  });
+  return Packer.toBlob(doc);
+}
+function cvFileName(){
+  const nm=($("cvName").value.trim()||"CV").replace(/\s+/g,"_");
+  const company=($("jobTitle").value.split(/\s[–-]\s/)[0]||"").trim().replace(/[^\w]+/g,"_").replace(/^_|_$/g,"");
+  return `${nm}_CV${company?"_"+company:""}.docx`;
+}
+$("dlBtn").onclick=async e=>{
+  if(!tailored) return;
+  const btn=e.currentTarget; btn.disabled=true;
+  const st=$("cvStatus");
+  try{
+    const blob=await makeDocx(tailored);
+    await saveFile(cvFileName(), blob);
+    st.className="status-line"; st.textContent="Saved as "+cvFileName()+".";
+  }catch(err){
+    if(err?.code!=="declined"){
+      st.className="status-line err";
+      st.textContent = err?.code==="no_lib" ? "The Word export didn't load. Check your connection and reload the page." : "Downloads aren't available here. Use Copy text and paste into Word.";
+    }
+  }finally{ btn.disabled=false; }
+};
+$("copyCv").onclick=e=>{ if(tailored) copyText(cvToText(tailored), e.currentTarget); };
+
+/* ---------- history ---------- */
+function renderHistory(){
+  const h=store.get("cvfit.history",[]);
+  const box=$("history");
+  if(!h.length){ box.replaceChildren(el("p","hint","Postings you save will be listed here so you can compare roles.")); return; }
+  box.replaceChildren(...h.map((x,i)=>{
+    const r=el("div","hist");
+    const t=el("div"); t.append(el("div","t",x.title||"Untitled posting"), el("div","d",new Date(x.date).toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})));
+    const sc=el("div","hint",`Keywords ${x.kw??"–"}% · AI ${x.ai?.score??"–"}${x.cv?" · CV":""}`);
+    const btns=el("div","row");
+    const o=el("button","small","Open"); o.onclick=()=>{ $("jobTitle").value=x.title||""; $("jd").value=x.jd; ai=x.ai||null; aiForJd=x.ai?x.jd:null; if(ai) renderAI(ai,"Saved "+new Date(x.date).toLocaleDateString()); else clearAI(); tailored=x.cv||null; tailoredForJd=x.cv?x.jd:null; if(tailored) renderCV(tailored,"Saved "+new Date(x.date).toLocaleDateString()); else clearCV(); analyse(); window.scrollTo({top:0,behavior:"smooth"}); };
+    const d=el("button","small","Remove"); d.onclick=()=>{ const all=store.get("cvfit.history",[]); all.splice(i,1); store.set("cvfit.history",all); renderHistory(); };
+    btns.append(o,d); r.append(t,sc,btns); return r;
+  }));
+}
+$("saveBtn").onclick=()=>{
+  const jd=$("jd").value.trim(); if(!jd){ $("aiStatus").textContent="Nothing to save yet."; return; }
+  const {pct}=analyse();
+  const all=store.get("cvfit.history",[]);
+  all.unshift({title:$("jobTitle").value.trim()||jd.slice(0,50), date:Date.now(), jd:$("jd").value, kw:pct, ai:(ai&&aiForJd===$("jd").value)?ai:null, cv:(tailored&&tailoredForJd===$("jd").value)?tailored:null});
+  store.set("cvfit.history", all.slice(0,20)); renderHistory();
+  $("aiStatus").className="status-line"; $("aiStatus").textContent="Saved to history.";
+};
+$("clearBtn").onclick=()=>{ $("jobTitle").value=""; $("jd").value=""; clearAI(); clearCV(); analyse(); $("jd").focus(); };
+
+/* ---------- wiring ---------- */
+let t; const schedule=()=>{ clearTimeout(t); t=setTimeout(()=>{ if(ai && aiForJd!==$("jd").value) clearAI(); if(tailored && tailoredForJd!==$("jd").value) clearCV(); analyse(); },250); };
+for(const [id,key] of [["cvName","cvfit.name"],["cvContact","cvfit.contact"]]) $(id).addEventListener("input",()=>{ store.set(key,$(id).value); if(tailored) renderCV(tailored,$("cvSrc").textContent); });
+$("jd").addEventListener("input",schedule);
+$("cv").addEventListener("input",()=>{ store.set("cvfit.cv",$("cv").value); schedule(); });
+$("resetCv").onclick=()=>{ $("cv").value=DEFAULT_CV; store.set("cvfit.cv",null); analyse(); };
+$("copySummary").onclick=e=>copyText($("summary").textContent,e.currentTarget);
+
+/* ---------- boot: open on the SkyCargo example ---------- */
+$("cv").value = store.get("cvfit.cv",null) || DEFAULT_CV;
+$("jobTitle").value = EXAMPLE_TITLE;
+$("jd").value = EXAMPLE_JD;
+ai = EXAMPLE_AI; aiForJd = EXAMPLE_JD;
+renderAI(EXAMPLE_AI, "Saved analysis for this posting");
+$("cvName").value = store.get("cvfit.name",null) ?? DEFAULT_NAME;
+$("cvContact").value = store.get("cvfit.contact",null) ?? DEFAULT_CONTACT;
+tailored = EXAMPLE_CV; tailoredForJd = EXAMPLE_JD;
+renderCV(EXAMPLE_CV, "Example: tailored for the SkyCargo posting");
+analyse();
+renderHistory();
+</script>
+
+</body>
+</html>
